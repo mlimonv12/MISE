@@ -608,6 +608,18 @@
       {
         "netclass": "uC",
         "pattern": "/CLK-"
+      },
+      {
+        "netclass": "uC",
+        "pattern": "RST_LCD"
+      },
+      {
+        "netclass": "uC",
+        "pattern": "PHOTO1"
+      },
+      {
+        "netclass": "uC",
+        "pattern": "PHOTO2"
       }
     ]
   },
