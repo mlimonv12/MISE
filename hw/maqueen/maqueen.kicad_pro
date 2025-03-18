@@ -620,6 +620,10 @@
       {
         "netclass": "uC",
         "pattern": "PHOTO2"
+      },
+      {
+        "netclass": "uC",
+        "pattern": "/WIFI_CE"
       }
     ]
   },
