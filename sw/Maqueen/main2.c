@@ -7,6 +7,7 @@
 #define ADDR_LCD 0x3E
 
 uint8_t *PTxData, *PRxData, TXByteCtr, RXByteCtr;
+uint8_t RX_end = 0;
 uint8_t buffer_i2c [12];
 
 uint32_t count = 0;
@@ -40,13 +41,15 @@ void init_clocks(void)
     PM5CTL0 &= ~LOCKLPM5; // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings
 }
 
-void init_timers() {
+void init_timers()
+{
     TB0CCR0 = 33; // ~1ms at 2^15 Hz
     TB0CTL = TBCLR | TBSSEL_1 | MC_1; // CLEAR+ACLK+UPMODE
     TB0CCTL0 = ~CCIE; // INTERRUPTS
 }
 
-void delay_ms(uint32_t temps) { //temps en ms
+void delay_ms(uint32_t temps)
+{ //temps en ms
     TB0CTL = TBCLR | TBSSEL_1 | MC_1; // CLEAR+ACLK+UPMODE
     TB0CCTL0 = CCIE; // Enable interrupts
     count = 0;
@@ -82,6 +85,7 @@ void I2C_send(uint8_t addr, uint8_t *buffer, uint8_t n_dades)
  
 void I2C_receive(uint8_t addr, uint8_t *buffer, uint8_t n_dades)
 {
+    RX_end = 0;
     PRxData = buffer; //adreça del buffer on ficarem les dades rebudes
     RXByteCtr = n_dades; //carreguem el número de dades a rebre
     UCB0I2CSA = addr; //Coloquem l’adreça de slave
@@ -93,7 +97,8 @@ void I2C_receive(uint8_t addr, uint8_t *buffer, uint8_t n_dades)
 }
 
 // Interfície
-void LEDs(uint8_t color_left, uint8_t color_right) {
+void LEDs(uint8_t color_left, uint8_t color_right)
+{
     uint8_t buffer_in [3];
     buffer_in[0] = 0x0B;
     buffer_in[1] = color_left;
@@ -101,7 +106,8 @@ void LEDs(uint8_t color_left, uint8_t color_right) {
     I2C_send(ADDR_ROBOT, buffer_in, 3); // LEDs
 }
 
-void motors(uint8_t left_dir, uint8_t left_speed, uint8_t right_dir, uint8_t right_speed) {
+void motors(uint8_t left_dir, uint8_t left_speed, uint8_t right_dir, uint8_t right_speed)
+{
     uint8_t buffer_in [5];
     buffer_in[0] = 0x00;
     buffer_in[1] = left_dir; // 1 forward, 2 backwards
@@ -111,14 +117,17 @@ void motors(uint8_t left_dir, uint8_t left_speed, uint8_t right_dir, uint8_t rig
     I2C_send(ADDR_ROBOT, buffer_in, 5); // Motor
 }
 
-void fotodetectors(uint8_t *buffer_out) {
+void fotodetectors(uint8_t *buffer_out)
+{
     uint8_t buffer_in = 0x1D;
     I2C_send(ADDR_ROBOT, &buffer_in, 1);
+    delay_ms(5);
     I2C_receive(ADDR_ROBOT, buffer_out, 1);
     //buffer_out &= (BIT7 | BIT6); // Mask to filter 2 MSBs
 }
 
-void calculate_motors(uint8_t *previous, uint8_t *next) {
+void calculate_motors(uint8_t *previous, uint8_t *next)
+{
     uint8_t stat;
     fotodetectors(&stat); // Obtain data
 
@@ -158,12 +167,21 @@ void calculate_motors(uint8_t *previous, uint8_t *next) {
 main(void) {
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     init_clocks();
+    init_timers();
     init_i2c();
 
-    LEDs(6, 5);
+    LEDs(3, 3);
 
-    uint8_t vals_foto;
+    uint8_t vals_foto = 0;
     fotodetectors(&vals_foto);
+    uint8_t buffer_in = 0x1D;
+    I2C_send(ADDR_ROBOT, &buffer_in, 1);
+    delay_ms(5);
+    I2C_receive(ADDR_ROBOT, &vals_foto, 1);
+    delay_ms(5);
+    I2C_receive(ADDR_ROBOT, &vals_foto, 1);
+    delay_ms(5);
+    I2C_receive(ADDR_ROBOT, &vals_foto, 1);
 
     /*
     buffer_i2c[0] = 0x00;
@@ -194,7 +212,8 @@ main(void) {
 // Timer B0 ********************************************************************
 //******************************************************************************
 #pragma vector=TIMER0_B0_VECTOR
-__interrupt void timerB0_0_isr(void){
+__interrupt void timerB0_0_isr(void)
+{
     TB0CTL &= ~CCIFG; // CLEAR FLAG
     count++;
 }
@@ -218,31 +237,36 @@ __interrupt void ISR_USCI_I2C(void)
         case USCI_I2C_UCSTPIFG: break; // Vector 8: STPIFG
         case USCI_I2C_UCRXIFG0: // Vector 10: RXIFG
             /*
-            if (RXByteCtr > 0) {
+            //if (RX_end == 0) {
                 *PRxData++ = UCB0RXBUF; // Move received data to PRxData
-                RXByteCtr--; // Decrement RX byte counter
-                if (RXByteCtr == 0) {
+                if ((RXByteCtr == 0)) {
+                    //RX_end = 1; // Make sure we don't come back in here
                     UCB0CTLW0 |= UCTXSTP; // Generate I2C STOP condition
                     __bic_SR_register_on_exit(LPM0_bits); // Exit LPM0
+                } else {
+                    RXByteCtr--; // Decrement RX byte counter
                 }
-            }
+            //} else {
+            //    __bic_SR_register_on_exit(LPM0_bits); // Exit LPM0
+            //}
             break;
             */
-            /*
+            
             if (RXByteCtr)
             {
                 *PRxData++ = UCB0RXBUF; // Mou la dada rebuda a l’adreça PRxData
                 if (RXByteCtr == 1) { // Queda només una?
                     UCB0CTLW0 |= UCTXSTP; // Genera I2C stop condition
                 }
+                RXByteCtr--; // Decrement RX byte counter
             } else {
-                *PRxData = UCB0RXBUF; // Mou la dada rebuda a l’adreça PRxData
+                //*PRxData++ = UCB0RXBUF; // Mou la dada rebuda a l’adreça PRxData
+                UCB0IFG &= ~UCRXIFG; // Clear USCI_B1 TX int flag
                 __bic_SR_register_on_exit(LPM0_bits); // Exit del mode baix consum LPM0, activa la CPU
             }
-            RXByteCtr--; // Decrement RX byte counter
             break;
-            */
             
+            /*
             if (RXByteCtr)
             {
                 *PRxData++ = UCB0RXBUF;
@@ -259,10 +283,11 @@ __interrupt void ISR_USCI_I2C(void)
                 __bic_SR_register_on_exit(CPUOFF);      // Exit LPM0
             }
             break;
-            
+            */
         case USCI_I2C_UCTXIFG0: // Vector 12: TXIFG
             if (TXByteCtr) // Check TX byte counter
                 {
+
                 UCB0TXBUF = *PTxData++; // Carrega el TX buffer amb la dada a enviar
                 TXByteCtr--; // Decrementa TX byte counter
                 }
