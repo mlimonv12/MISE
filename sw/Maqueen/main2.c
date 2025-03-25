@@ -1,14 +1,22 @@
 #include <msp430.h>
 #include <stdint.h>
+#include <stdio.h>
 //#include <intrinsics.h>
 //#include <Energia.h>
 
 #define ADDR_ROBOT 0x10
 #define ADDR_LCD 0x3E
 
+#define STRAIGHT 0
+#define TURN_R 1
+#define TURN_L 2
+#define STOP 3
+#define LOST 4
+
 uint8_t *PTxData, *PRxData, TXByteCtr, RXByteCtr;
 uint8_t RX_end = 0;
 uint8_t buffer_i2c [12];
+uint8_t msg [20];
 
 uint32_t count = 0;
 
@@ -16,7 +24,7 @@ uint32_t count = 0;
  * main.c
  */
 
-void init_clocks(void)
+void init_clocks()
 { // Configure one FRAM waitstate as required by the device datasheet for MCLK operation beyond 8MHz before configuring the clock system
     FRCTL0 = FRCTLPW | NWAITS_1;
     P2SEL1 |= BIT6 | BIT7; // P2.6~P2.7: crystal pins
@@ -46,6 +54,12 @@ void init_timers()
     TB0CCR0 = 33; // ~1ms at 2^15 Hz
     TB0CTL = TBCLR | TBSSEL_1 | MC_1; // CLEAR+ACLK+UPMODE
     TB0CCTL0 = ~CCIE; // INTERRUPTS
+}
+
+void init_GPIOs() {
+    P5SEL1 &= ~BIT2; // Assumim default = GPIO
+    P5DIR |= BIT2; // Output RST LCD
+    P5OUT &= ~BIT2;
 }
 
 void delay_ms(uint32_t temps)
@@ -121,12 +135,11 @@ void fotodetectors(uint8_t *buffer_out)
 {
     uint8_t buffer_in = 0x1D;
     I2C_send(ADDR_ROBOT, &buffer_in, 1);
-    delay_ms(5);
+    delay_ms(1);
     I2C_receive(ADDR_ROBOT, buffer_out, 1);
-    //buffer_out &= (BIT7 | BIT6); // Mask to filter 2 MSBs
 }
 
-void calculate_motors(uint8_t *previous, uint8_t *next)
+uint8_t calculate_motors(uint8_t *previous, uint8_t *next)
 {
     uint8_t stat;
     fotodetectors(&stat); // Obtain data
@@ -137,30 +150,50 @@ void calculate_motors(uint8_t *previous, uint8_t *next)
     next[2] = previous[2]; // right_dir
     next[3] = previous[3]; // right_speed
 
-    // Check if the robot is on the line
-    if ((stat & 0b00001100) == 0b00001100) { // Line is under the robot
-        // Both front center photodetectors are on the line
-        next[1] = 50; // Set left speed
-        next[3] = 50; // Set right speed
-    } else if ((stat & 0b00001100) == 0b00000100) { // Only left front photodetector is on the line
-        // Adjust speed to turn right
-        next[1] = 30; // Slow down left motor
-        next[3] = 50; // Keep right motor speed
-    } else if ((stat & 0b00001100) == 0b00001000) { // Only right front photodetector is on the line
-        // Adjust speed to turn left
-        next[1] = 50; // Keep left motor speed
-        next[3] = 30; // Slow down right motor
-    } else {
-        // Robot is off the line, stop or turn
-        next[1] = 0; // Stop left motor
-        next[3] = 0; // Stop right motor
-    }
-
     // Check for cul-de-sac using side photodetectors
-    if ((stat & 0b00100001) == 0b00100001) { // Both side photodetectors are on the surface
+    if ((stat & 0b00011110) == 0b00011110) { // All four fotodetectors
         // Robot is at a cul-de-sac (T-junction)
         next[0] = 0; // Stop left motor
         next[2] = 0; // Stop right motor
+
+        return STOP;
+
+    } else if ((stat & 0b00001100) == 0b00001100) { // Line is under the robot
+        // Check if the robot is on the line
+        // Both front center photodetectors are on the line
+        next[0] = 1; // Enable left motor
+        next[2] = 1; // Enable right motor
+        next[1] = 50; // Set left speed
+        next[3] = 50; // Set right speed
+
+        return STRAIGHT;
+
+    } else if ((stat & 0b00001100) == 0b00000100) { // Only left front photodetector is on the line
+        // Adjust speed to turn right
+        next[0] = 1; // Enable left motor
+        next[2] = 1; // Enable right motor
+        next[1] = 0; // Slow down left motor
+        next[3] = 50; // Keep right motor speed
+        
+        return TURN_R;
+
+    } else if ((stat & 0b00001100) == 0b00001000) { // Only right front photodetector is on the line
+        // Adjust speed to turn left
+        next[0] = 1; // Enable left motor
+        next[2] = 1; // Enable right motor
+        next[1] = 50; // Keep left motor speed
+        next[3] = 0; // Slow down right motor
+
+        return TURN_L;
+
+    } else {
+        // Robot is off the line, stop or turn
+        next[1] = 35; // Stop left motor
+        next[3] = 35; // Stop right motor
+        next[0] = 1; // Stop left motor
+        next[2] = 1; // Stop right motor
+
+        return LOST;
     }
 }
 
@@ -169,41 +202,66 @@ main(void) {
     init_clocks();
     init_timers();
     init_i2c();
+    init_GPIOs();
 
-    LEDs(3, 3);
+    LEDs(5, 5);
 
-    uint8_t vals_foto = 0;
-    fotodetectors(&vals_foto);
-    uint8_t buffer_in = 0x1D;
-    I2C_send(ADDR_ROBOT, &buffer_in, 1);
+    P5OUT |= BIT2;
     delay_ms(5);
-    I2C_receive(ADDR_ROBOT, &vals_foto, 1);
+    P5OUT &= ~BIT2;
     delay_ms(5);
-    I2C_receive(ADDR_ROBOT, &vals_foto, 1);
-    delay_ms(5);
-    I2C_receive(ADDR_ROBOT, &vals_foto, 1);
-
-    /*
     buffer_i2c[0] = 0x00;
-    buffer_i2c[0] = 0x0F;
+    buffer_i2c[1] = 0x38;
     I2C_send(ADDR_LCD, buffer_i2c, 2); // Provar d'encendre display
-    */
+    sprintf(msg, "@Test");
+    I2C_send(ADDR_LCD, msg, 5); // Provar d'enviar info
+    
 
     uint8_t stat_prev [4] = {1, 50, 1, 50}; // PREVIOUS: left_dir, left_speed, right_dir, right_speed
     uint8_t stat_next [4]; // NEXT: left_dir, left_speed, right_dir, right_speed
+    uint8_t leds_state = 0;
 
-    //motors(stat_prev[0], stat_prev[1], stat_prev[2], stat_prev[3]);
+    // Init motors
+    motors(stat_prev[0], stat_prev[1], stat_prev[2], stat_prev[3]);
 
     uint8_t i = 0;
     while(1){
-        calculate_motors(stat_prev, stat_next);
-        //motors(stat_next[0], stat_next[1], stat_next[2], stat_next[3]);
+        leds_state = calculate_motors(stat_prev, stat_next);
+        delay_ms(1);
+        motors(stat_next[0], stat_next[1], stat_next[2], stat_next[3]);
+        delay_ms(1);
+
+        switch (leds_state)
+        {
+        case STRAIGHT:
+            LEDs(2, 2);
+            break;
+
+        case TURN_L:
+            LEDs(2, 3);
+            break;
+
+        case TURN_R:
+            LEDs(3, 2);
+            break;
+
+        case STOP:
+            LEDs(1, 1);
+            break;
+
+        case LOST:
+            LEDs(4, 4);
+            break;
+        
+        default:
+            break;
+        }
 
         for (i = 0; i < 4; i++) {
             stat_prev[i] = stat_next[i];
         }
 
-        //delay_ms(10);
+        delay_ms(100);
         __no_operation();
     };
 }
@@ -234,24 +292,39 @@ __interrupt void ISR_USCI_I2C(void)
             __bic_SR_register_on_exit(LPM0_bits); // Exit low power mode
             break;
         case USCI_I2C_UCSTTIFG: break; // Vector 6: STTIFG
-        case USCI_I2C_UCSTPIFG: break; // Vector 8: STPIFG
+        case USCI_I2C_UCSTPIFG:
+            __bic_SR_register_on_exit(LPM0_bits);       // salir del modo de bajo de consumo cuando se emite un bi de stop
+            break;
         case USCI_I2C_UCRXIFG0: // Vector 10: RXIFG
+            
+            if(RXByteCtr){
+                *PRxData++=UCB0RXBUF;
+                if(RXByteCtr==1){
+                    UCB0CTLW0|=UCTXSTP;
+                }
+            }else{
+                *PRxData=UCB0RXBUF;
+                __bic_SR_register_on_exit(LPM0_bits); // Exit LPM0
+            }
+            RXByteCtr--;
+            break;
+               
             /*
-            //if (RX_end == 0) {
+            if (RX_end == 0) {
                 *PRxData++ = UCB0RXBUF; // Move received data to PRxData
-                if ((RXByteCtr == 0)) {
-                    //RX_end = 1; // Make sure we don't come back in here
+                if (RXByteCtr == 0) {
+                    RX_end = 1; // Make sure we don't come back in here
                     UCB0CTLW0 |= UCTXSTP; // Generate I2C STOP condition
                     __bic_SR_register_on_exit(LPM0_bits); // Exit LPM0
                 } else {
                     RXByteCtr--; // Decrement RX byte counter
                 }
-            //} else {
-            //    __bic_SR_register_on_exit(LPM0_bits); // Exit LPM0
-            //}
+            } else {
+                __bic_SR_register_on_exit(LPM0_bits); // Exit LPM0
+            }
             break;
             */
-            
+            /*
             if (RXByteCtr)
             {
                 *PRxData++ = UCB0RXBUF; // Mou la dada rebuda a l’adreça PRxData
@@ -265,7 +338,7 @@ __interrupt void ISR_USCI_I2C(void)
                 __bic_SR_register_on_exit(LPM0_bits); // Exit del mode baix consum LPM0, activa la CPU
             }
             break;
-            
+            */
             /*
             if (RXByteCtr)
             {
@@ -283,11 +356,10 @@ __interrupt void ISR_USCI_I2C(void)
                 __bic_SR_register_on_exit(CPUOFF);      // Exit LPM0
             }
             break;
-            */
+        */
         case USCI_I2C_UCTXIFG0: // Vector 12: TXIFG
             if (TXByteCtr) // Check TX byte counter
                 {
-
                 UCB0TXBUF = *PTxData++; // Carrega el TX buffer amb la dada a enviar
                 TXByteCtr--; // Decrementa TX byte counter
                 }
