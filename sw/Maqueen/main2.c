@@ -24,6 +24,7 @@ uint32_t count = 0;
  * main.c
  */
 
+// Inits
 void init_clocks()
 { // Configure one FRAM waitstate as required by the device datasheet for MCLK operation beyond 8MHz before configuring the clock system
     FRCTL0 = FRCTLPW | NWAITS_1;
@@ -90,8 +91,6 @@ void init_LCD()
     I2C_send(ADDR_LCD, buffer_i2c, 8); // Provar d'encendre display
 }
 
-
-// I2C
 void init_i2c()
 {
     //P4SEL0 |= BIT7 + BIT6; * // P4.6 SDA i P4.7 SCL com a USCI si fem server USCI B1
@@ -104,7 +103,12 @@ void init_i2c()
     UCB0CTLW0 &= ~UCSWRST; // Clear SW reset, resume operation
     UCB0IE |= UCTXIE0 | UCRXIE0; // Habilita les interrupcions a TX i RX
 }
- 
+
+void init_joystick()
+{
+    
+}
+// I2C
 //Envia una sèrie de "n_dades" a la adreça "addr" del I2C
 void I2C_send(uint8_t addr, uint8_t *buffer, uint8_t n_dades)
 {
@@ -170,13 +174,10 @@ necessita el display per mostrar text.
 */
 void display_LCD(char *msg, uint8_t length)
 {
-    uint8_t buffer_LCD[64];
-    char arroba [];
-    arroba[0] = "@";
-    strcat(&arroba, msg);
-    //buffer_LCD = 0x40;
-    sprintf(buffer_LCD, arroba);
+    uint8_t buffer_LCD[32];
+    sprintf(buffer_LCD, "%c%s", '@', msg);
     I2C_send(ADDR_LCD, buffer_LCD, length);
+    delay_ms(2);
 }
 
 uint8_t calculate_motors(uint8_t *previous, uint8_t *next)
@@ -248,8 +249,11 @@ main(void) {
 
     init_LCD();
 
-    char msg[] = "@ABCD";
-    display_LCD(msg, 5);
+    char msg[] = "ABCD";
+    display_LCD(msg, 4);
+
+    char msg2[] = "Bon dia lokete";
+    display_LCD(msg2, 14);
     
 
     uint8_t stat_prev [4] = {1, 50, 1, 50}; // PREVIOUS: left_dir, left_speed, right_dir, right_speed
