@@ -1,3 +1,5 @@
-2025/03/04-12:56:44.007 4bc0 Reusing MANIFEST C:\Users\HP\kDrive\University\10e\MISE\projecte\sw\.jxbrowser.userdata\Default\Site Characteristics Database/MANIFEST-000001
-2025/03/04-12:56:44.007 4bc0 Recovering log #3
-2025/03/04-12:56:44.007 4bc0 Reusing old log C:\Users\HP\kDrive\University\10e\MISE\projecte\sw\.jxbrowser.userdata\Default\Site Characteristics Database/000003.log 
+2025/04/01-11:33:06.369 84 Log #3: 4 ops saved to Table #4 OK
+2025/04/01-11:33:06.371 84 Archiving C:\Users\PC\Desktop\mise\MISE\sw\.jxbrowser.userdata\Default\Site Characteristics Database/000003.log: OK
+2025/04/01-11:33:06.371 84 Table #4: 4 entries OK
+2025/04/01-11:33:06.373 84 Archiving C:\Users\PC\Desktop\mise\MISE\sw\.jxbrowser.userdata\Default\Site Characteristics Database/MANIFEST-000001: OK
+2025/04/01-11:33:06.403 84 **** Repaired leveldb C:\Users\PC\Desktop\mise\MISE\sw\.jxbrowser.userdata\Default\Site Characteristics Database; recovered 1 files; 256 bytes. Some data may have been lost. ****

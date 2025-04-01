@@ -51,12 +51,13 @@ void init_clocks()
 
 void init_timers()
 {
-    TB0CCR0 = 16e3; // 16000 cycles = 0.001s = 1ms
-    TB0CTL |= (TBCLR | TBSSEL_2 | MC_1); // CLEAR+SMCLK+UPMODE
+    TB0CCR0 = 16000; // 16000 cycles = 0.001s = 1ms
+    TB0CTL |= (TBCLR | TBSSEL__SMCLK | MC__UP); // CLEAR+SMCLK+UPMODE
     TB0CCTL0 &= ~CCIE; // INTERRUPTS
 }
 
-void init_GPIOs() {
+void init_GPIOs()
+{
     P5SEL1 &= ~BIT2; // Assumim default = GPIO
     P5DIR |= BIT2; // Output RST LCD
     P5OUT &= ~BIT2;
@@ -64,26 +65,31 @@ void init_GPIOs() {
 
 void delay_ms(uint32_t temps)
 { //temps en ms
-    TB0CTL |= (TBCLR | TBSSEL_2 | MC_1); // CLEAR+SMCLK+UPMODE
+    TB0CTL |= (TBCLR | TBSSEL__SMCLK | MC__UP); // CLEAR+SMCLK+UPMODE
     TB0CCTL0 |= CCIE; // Enable interrupts
     count = 0;
     while(count<temps);
     TB0CCTL0 &= ~CCIE; // Disable interrupts
 }
 
-/*
-1- RST del display: commutar el GPIO RST_LCD, esperar uns ms i tornar a commutar el GPIO
-2- Enviar comandaments I2C de la rutina ASSEMBLY
-
-Per escriure un string, es pot fer servir la funció "sprint(msg, "@Hola com estas?")". 
-Aquesta funció ens guarda els valors ASCII a dins el buffer "msg", byte a byte. 
-L'@ es posa al principi ja que es correspon en codi HEX (0x40) amb la comanda que 
-necessita el display per mostrar text.
-*/
-void display_LCD(char *msg)
+void init_LCD()
 {
-
+    uint8_t buffer_i2c[8];
+    P5OUT &= ~BIT2;
+    delay_ms(10);
+    P5OUT |= BIT2;
+    delay_ms(10);
+    buffer_i2c[0] = 0x00;
+    buffer_i2c[1] = 0x39;
+    buffer_i2c[2] = 0x14;
+    buffer_i2c[3] = 0x74;
+    buffer_i2c[4] = 0x54;
+    buffer_i2c[5] = 0x6F;
+    buffer_i2c[6] = 0x0C;
+    buffer_i2c[7] = 0x01;
+    I2C_send(ADDR_LCD, buffer_i2c, 8); // Provar d'encendre display
 }
+
 
 // I2C
 void init_i2c()
@@ -153,6 +159,26 @@ void fotodetectors(uint8_t *buffer_out)
     I2C_receive(ADDR_ROBOT, buffer_out, 1);
 }
 
+/*
+1- RST del display: commutar el GPIO RST_LCD, esperar uns ms i tornar a commutar el GPIO
+2- Enviar comandaments I2C de la rutina ASSEMBLY
+
+Per escriure un string, es pot fer servir la funció "sprint(msg, "@Hola com estas?")".
+Aquesta funció ens guarda els valors ASCII a dins el buffer "msg", byte a byte.
+L'@ es posa al principi ja que es correspon en codi HEX (0x40) amb la comanda que
+necessita el display per mostrar text.
+*/
+void display_LCD(char *msg, uint8_t length)
+{
+    uint8_t buffer_LCD[64];
+    char arroba [];
+    arroba[0] = "@";
+    strcat(&arroba, msg);
+    //buffer_LCD = 0x40;
+    sprintf(buffer_LCD, arroba);
+    I2C_send(ADDR_LCD, buffer_LCD, length);
+}
+
 uint8_t calculate_motors(uint8_t *previous, uint8_t *next)
 {
     uint8_t stat;
@@ -220,15 +246,10 @@ main(void) {
 
     LEDs(5, 5);
 
-    P5OUT |= BIT2;
-    delay_ms(5);
-    P5OUT &= ~BIT2;
-    delay_ms(5);
-    buffer_i2c[0] = 0x00;
-    buffer_i2c[1] = 0x38;
-    I2C_send(ADDR_LCD, buffer_i2c, 2); // Provar d'encendre display
-    sprintf(msg, "@Test");
-    I2C_send(ADDR_LCD, msg, 5); // Provar d'enviar info
+    init_LCD();
+
+    char msg[] = "@ABCD";
+    display_LCD(msg, 5);
     
 
     uint8_t stat_prev [4] = {1, 50, 1, 50}; // PREVIOUS: left_dir, left_speed, right_dir, right_speed
@@ -236,13 +257,13 @@ main(void) {
     uint8_t leds_state = 0;
 
     // Init motors
-    motors(stat_prev[0], stat_prev[1], stat_prev[2], stat_prev[3]);
+    //motors(stat_prev[0], stat_prev[1], stat_prev[2], stat_prev[3]);
 
     uint8_t i = 0;
     while(1){
         leds_state = calculate_motors(stat_prev, stat_next);
         delay_ms(1);
-        motors(stat_next[0], stat_next[1], stat_next[2], stat_next[3]);
+        // motors(stat_next[0], stat_next[1], stat_next[2], stat_next[3]);
         delay_ms(1);
 
         switch (leds_state)
