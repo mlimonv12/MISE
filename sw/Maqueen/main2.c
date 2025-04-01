@@ -51,9 +51,9 @@ void init_clocks()
 
 void init_timers()
 {
-    TB0CCR0 = 33; // ~1ms at 2^15 Hz
-    TB0CTL = TBCLR | TBSSEL_1 | MC_1; // CLEAR+ACLK+UPMODE
-    TB0CCTL0 = ~CCIE; // INTERRUPTS
+    TB0CCR0 = 16e3; // 16000 cycles = 0.001s = 1ms
+    TB0CTL |= (TBCLR | TBSSEL_2 | MC_1); // CLEAR+SMCLK+UPMODE
+    TB0CCTL0 &= ~CCIE; // INTERRUPTS
 }
 
 void init_GPIOs() {
@@ -64,11 +64,11 @@ void init_GPIOs() {
 
 void delay_ms(uint32_t temps)
 { //temps en ms
-    TB0CTL = TBCLR | TBSSEL_1 | MC_1; // CLEAR+ACLK+UPMODE
-    TB0CCTL0 = CCIE; // Enable interrupts
+    TB0CTL |= (TBCLR | TBSSEL_2 | MC_1); // CLEAR+SMCLK+UPMODE
+    TB0CCTL0 |= CCIE; // Enable interrupts
     count = 0;
     while(count<temps);
-    TB0CCTL0 = ~CCIE; // Disable interrupts
+    TB0CCTL0 &= ~CCIE; // Disable interrupts
 }
 
 // I2C
