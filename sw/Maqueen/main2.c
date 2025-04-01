@@ -71,6 +71,20 @@ void delay_ms(uint32_t temps)
     TB0CCTL0 &= ~CCIE; // Disable interrupts
 }
 
+/*
+1- RST del display: commutar el GPIO RST_LCD, esperar uns ms i tornar a commutar el GPIO
+2- Enviar comandaments I2C de la rutina ASSEMBLY
+
+Per escriure un string, es pot fer servir la funció "sprint(msg, "@Hola com estas?")". 
+Aquesta funció ens guarda els valors ASCII a dins el buffer "msg", byte a byte. 
+L'@ es posa al principi ja que es correspon en codi HEX (0x40) amb la comanda que 
+necessita el display per mostrar text.
+*/
+void display_LCD(char *msg)
+{
+
+}
+
 // I2C
 void init_i2c()
 {
