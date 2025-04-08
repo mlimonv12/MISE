@@ -7,16 +7,23 @@
 #define ADDR_ROBOT 0x10
 #define ADDR_LCD 0x3E
 
+// Joystick macros
+#define JS_BITS 0x3D //(BIT0 | BIT2 | BIT3 | BIT4 | BIT5)
+
+// Motor macros
 #define STRAIGHT 0
 #define TURN_R 1
 #define TURN_L 2
 #define STOP 3
 #define LOST 4
 
+
 uint8_t *PTxData, *PRxData, TXByteCtr, RXByteCtr;
 uint8_t RX_end = 0;
 uint8_t buffer_i2c [12];
 uint8_t msg [20];
+
+uint8_t menu_level = 0;
 
 uint32_t count = 0;
 
@@ -59,9 +66,20 @@ void init_timers()
 
 void init_GPIOs()
 {
+    P3SEL0 &= JS_BITS; //
     P5SEL1 &= ~BIT2; // Assumim default = GPIO
+
+    P3DIR &= ~JS_BITS; // Joystick inputs
     P5DIR |= BIT2; // Output RST LCD
+
+    P3REN |= JS_BITS; // Pull R enabled for joystick
+
+    P3OUT &= ~JS_BITS; // JS pulled down
     P5OUT &= ~BIT2;
+
+    P3IE |= JS_BITS; // Enable JS interrupts
+    P3IES &= ~JS_BITS; // JS interrupts on Low-to-High transition
+    P3IFG &= ~JS_BITS; // Clear JS interrupt flags
 }
 
 void delay_ms(uint32_t temps)
@@ -163,6 +181,8 @@ void fotodetectors(uint8_t *buffer_out)
     I2C_receive(ADDR_ROBOT, buffer_out, 1);
 }
 
+
+
 /*
 1- RST del display: commutar el GPIO RST_LCD, esperar uns ms i tornar a commutar el GPIO
 2- Enviar comandaments I2C de la rutina ASSEMBLY
@@ -249,8 +269,9 @@ main(void) {
 
     init_LCD();
 
-    char msg[] = "ABCD";
-    display_LCD(msg, 4);
+    char msg1[] = "Bon";
+    //char msg2[] = "dia";
+    char msg3[] = "lokete";
 
     char msg2[] = "Bon dia lokete";
     display_LCD(msg2, 14);
@@ -313,6 +334,42 @@ __interrupt void timerB0_0_isr(void)
 {
     TB0CTL &= ~CCIFG; // CLEAR FLAG
     count++;
+}
+
+//******************************************************************************
+// Joystick interrupt **********************************************************
+//******************************************************************************
+#pragma vector=PORT3_VECTOR
+__interrupt void readjoystick(void)
+{
+    P3IE &= ~JS_BITS; // Disable JS interrupts
+    P3IFG &= ~JS_BITS; // CLEAR FLAG
+
+    char m[1] = 'A';
+    uint8_t JS_value = P3IN & JS_BITS; // Read joystick state
+
+    if (JS_value == BIT2)
+    {
+        *m = '2';
+    } else if (JS_value == BIT0)
+    {
+        *m = '0';
+    } else if (JS_value == BIT3)
+    {
+        *m = '3';
+    } else if (JS_value == BIT4)
+    {
+        *m = '4';
+    } else if (JS_value == BIT5)
+    {
+        *m = '5';
+    } else {
+        *m = 'K';
+    }
+    
+    display_LCD(m, 1);
+
+    P3IE |= JS_BITS; // Enable JS interrupts
 }
 
 //******************************************************************************
