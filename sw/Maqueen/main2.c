@@ -66,7 +66,7 @@ void init_timers()
 
 void init_GPIOs()
 {
-    P3SEL0 &= JS_BITS; //
+    P3SEL0 &= ~JS_BITS; //
     P5SEL1 &= ~BIT2; // Assumim default = GPIO
 
     P3DIR &= ~JS_BITS; // Joystick inputs
@@ -74,11 +74,11 @@ void init_GPIOs()
 
     P3REN |= JS_BITS; // Pull R enabled for joystick
 
-    P3OUT &= ~JS_BITS; // JS pulled down
+    P3OUT |= JS_BITS; // JS pulled down
     P5OUT &= ~BIT2;
 
     P3IE |= JS_BITS; // Enable JS interrupts
-    P3IES &= ~JS_BITS; // JS interrupts on Low-to-High transition
+    P3IES |= JS_BITS; // JS interrupts on High-to-low transition
     P3IFG &= ~JS_BITS; // Clear JS interrupt flags
 }
 
@@ -89,24 +89,6 @@ void delay_ms(uint32_t temps)
     count = 0;
     while(count<temps);
     TB0CCTL0 &= ~CCIE; // Disable interrupts
-}
-
-void init_LCD()
-{
-    uint8_t buffer_i2c[8];
-    P5OUT &= ~BIT2;
-    delay_ms(10);
-    P5OUT |= BIT2;
-    delay_ms(10);
-    buffer_i2c[0] = 0x00;
-    buffer_i2c[1] = 0x39;
-    buffer_i2c[2] = 0x14;
-    buffer_i2c[3] = 0x74;
-    buffer_i2c[4] = 0x54;
-    buffer_i2c[5] = 0x6F;
-    buffer_i2c[6] = 0x0C;
-    buffer_i2c[7] = 0x01;
-    I2C_send(ADDR_LCD, buffer_i2c, 8); // Provar d'encendre display
 }
 
 void init_i2c()
@@ -152,6 +134,25 @@ void I2C_receive(uint8_t addr, uint8_t *buffer, uint8_t n_dades)
     __no_operation(); // Resta en mode LPM0 fins que es rebin totes les dades
 }
 
+void init_LCD()
+{
+    uint8_t buffer_i2c[8];
+    P5OUT &= ~BIT2;
+    delay_ms(10);
+    P5OUT |= BIT2;
+    delay_ms(10);
+    buffer_i2c[0] = 0x00;
+    buffer_i2c[1] = 0x39;
+    buffer_i2c[2] = 0x14;
+    buffer_i2c[3] = 0x74;
+    buffer_i2c[4] = 0x54;
+    buffer_i2c[5] = 0x6F;
+    buffer_i2c[6] = 0x0C;
+    buffer_i2c[7] = 0x01;
+    I2C_send(ADDR_LCD, buffer_i2c, 8); // Provar d'encendre display
+}
+
+
 // Interfície
 void LEDs(uint8_t color_left, uint8_t color_right)
 {
@@ -196,7 +197,7 @@ void display_LCD(char *msg, uint8_t length)
 {
     uint8_t buffer_LCD[32];
     sprintf(buffer_LCD, "%c%s", '@', msg);
-    I2C_send(ADDR_LCD, buffer_LCD, length);
+    I2C_send(ADDR_LCD, buffer_LCD, length+1);
     delay_ms(2);
 }
 
@@ -274,7 +275,7 @@ main(void) {
     char msg3[] = "lokete";
 
     char msg2[] = "Bon dia lokete";
-    display_LCD(msg2, 14);
+    //display_LCD(msg2, 1);
     
 
     uint8_t stat_prev [4] = {1, 50, 1, 50}; // PREVIOUS: left_dir, left_speed, right_dir, right_speed
