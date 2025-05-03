@@ -17,6 +17,10 @@
 #define STOP 3
 #define LOST 4
 
+// UART
+typedef unsigned char byte;
+#define TXD0_READY (UCA0IFG & UCTXIFG)
+
 
 uint8_t *PTxData, *PRxData, TXByteCtr, RXByteCtr;
 uint8_t RX_end = 0;
@@ -50,7 +54,8 @@ void init_clocks()
     __delay_cycles(3);
     __bic_SR_register(SCG0); // enable FLL
     //Software_Trim(); // Software Trim to get the best DCOFTRIM value**
-    CSCTL4 = SELMS__DCOCLKDIV | SELA__XT1CLK; // set XT1 (~32768Hz) as ACLK source, ACLK = 32768Hz
+    //CSCTL4 = SELMS__DCOCLKDIV | SELA__XT1CLK; // set XT1 (~32768Hz) as ACLK source, ACLK = 32768Hz
+    CSCTL4 = SELMS__DCOCLKDIV | SELA__REFO; // set XT1 (~32768Hz) as ACLK source, ACLK = 32768Hz
     // default DCOCLKDIV as MCLK and SMCLK source
     P1DIR |= BIT0 | BIT1; // set SMCLK, ACLK pin as output
     P1SEL1 |= BIT0 | BIT1; // set SMCLK and ACLK pin as second function
@@ -66,8 +71,8 @@ void init_timers()
 
 void init_GPIOs()
 {
-    P3SEL0 &= ~JS_BITS; //
-    P5SEL1 &= ~BIT2; // Assumim default = GPIO
+    P3SEL0 &= ~JS_BITS; // Initialize all ports on primary function (GPIO)
+    P5SEL1 &= ~BIT2; // 
 
     P3DIR &= ~JS_BITS; // Joystick inputs
     P5DIR |= BIT2; // Output RST LCD
@@ -75,7 +80,7 @@ void init_GPIOs()
     P3REN |= JS_BITS; // Pull R enabled for joystick
 
     P3OUT |= JS_BITS; // JS pulled down
-    P5OUT &= ~BIT2;
+    P5OUT &= ~BIT2; // LCD RST Initially set to low
 
     P3IE |= JS_BITS; // Enable JS interrupts
     P3IES |= JS_BITS; // JS interrupts on High-to-low transition
@@ -104,10 +109,7 @@ void init_i2c()
     UCB0IE |= UCTXIE0 | UCRXIE0; // Habilita les interrupcions a TX i RX
 }
 
-void init_joystick()
-{
-    
-}
+
 // I2C
 //Envia una sèrie de "n_dades" a la adreça "addr" del I2C
 void I2C_send(uint8_t addr, uint8_t *buffer, uint8_t n_dades)
@@ -151,6 +153,36 @@ void init_LCD()
     buffer_i2c[7] = 0x01;
     I2C_send(ADDR_LCD, buffer_i2c, 8); // Provar d'encendre display
 }
+
+
+
+void Init_UART(void)
+{
+UCA0CTLW0 |= UCSWRST; // Fem un reset de la USCI i que estigui “inoperativa”
+UCA0CTLW0 |= UCSSEL__SMCLK;
+// UCSYNC=0 mode asíncron
+// UCMODEx=0 seleccionem mode UART
+// UCSPB=0 nomes 1 stop bit
+// UC7BIT=0 8 bits de dades
+// UCMSB=0 bit de menys pes primer
+// UCPAR=x no es fa servir bit de paritat
+// UCPEN=0 sense bit de paritat
+// Triem SMCLK (16MHz) com a font del clock BRCLK
+UCA0MCTLW = UCOS16; // oversampling => bit 0 = UCOS16 = 1.
+UCA0BRW = 8; // Prescaler de BRCLK
+UCA0MCTLW |= (8 << 4); // Desem el valor 10 al camp UCBRFx del registre, first modulation stage select
+// ELS CÀLCULS EM DONEN 8, INICIALMENT DEIA 10?
+UCA0MCTLW |= (0xF7 << 8); // Desem el valor 0xF7 al camp UCBRS0 del registre,
+                            // Config. corresponent a la part fraccional de N (second modulation stage select)
+P1SEL0 |= BIT7 | BIT6; // I/O funció: P1.7 = UART_TX, P1.6 = UART_RX
+P1SEL1 &= ~(BIT7 | BIT6); // I/O funció: P1.7 = UART_TX, P1.6 = UART_RX
+UCA0CTLW0 &= ~UCSWRST; // Reactivem la línia de comunicacions sèrie
+UCA0IE |= UCRXIE; // Interrupcions activades per la recepció a la UART
+UCA0IFG &= ~UCRXIFGE; // Per si de cas, esborrem qualsevol activació d’interrupció fins ara
+}
+
+
+
 
 
 // Interfície
