@@ -10,14 +10,13 @@
 
 #define RX_BUFFER_SIZE 512 // buffer UART. Ojo: puede superar los 255 caracteres
 
-//Estructura de datos de respuesta a una recepción.
+//Estructura de datos de respuesta a una recepciï¿½n.
 typedef struct RxReturn
 {
     uint8_t StatusPacket[RX_BUFFER_SIZE]; //Para almacenar la trama recibida
     uint8_t time_out;   //Indica si ha habido un problema de timeout durante la recepcion
     uint16_t num_bytes;//El numero de bytes recibidos. Ojo: puede superar los 255 caracteres => tipo de 16 bits
     //Se puede ampliar con mas campos si se considera oportuno.
-    //...
 }RxReturn;
 
 /*
