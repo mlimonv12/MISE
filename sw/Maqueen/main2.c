@@ -1,6 +1,7 @@
 #include <msp430.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 //#include <intrinsics.h>
 //#include <Energia.h>
 
@@ -193,13 +194,91 @@ Aquesta funciÃ³ ens guarda els valors ASCII a dins el buffer "msg", byte a byte.
 L'@ es posa al principi ja que es correspon en codi HEX (0x40) amb la comanda que
 necessita el display per mostrar text.
 */
+/*
 void display_LCD(char *msg, uint8_t length)
 {
-    uint8_t buffer_LCD[32];
+    uint8_t buffer_LCD[33];
     sprintf(buffer_LCD, "%c%s", '@', msg);
     I2C_send(ADDR_LCD, buffer_LCD, length+1);
     delay_ms(2);
 }
+
+void display_LCD(char *msg, uint8_t length)
+{
+    uint8_t buffer_LCD[36]; // 32 + 2x@ + 0x00 + 0xC0
+
+    if (length > 16) {
+        sprintf(buffer_LCD, "%c%s%c%c%c%s", '@', msg[0:15], '\0', 'À', '@', msg[16:length-1]);
+        I2C_send(ADDR_LCD, buffer_LCD, length+6);
+
+    } else {
+        sprintf(buffer_LCD, "%c%s", '@', msg);
+        I2C_send(ADDR_LCD, buffer_LCD, length+1);
+    }
+
+    delay_ms(2);
+}
+*/
+/*
+#include <string.h> // for strlen, strncpy, etc.
+
+void display_LCD(char *msg)
+{
+    uint8_t buffer_LCD[40];
+    int bytes_written = 0;
+    size_t length = strlen(msg);  // Automatically get string length
+
+    if (length > 16) {
+        char line1[17] = {0};
+        char line2[17] = {0};
+
+        strncpy(line1, msg, 16);
+        strncpy(line2, msg + 16, length - 16 > 16 ? 16 : length - 16);
+
+        bytes_written = sprintf((char *)buffer_LCD, "%c%s%c%c%c%s", '@', line1, 0x00, 0xC0, '@', line2);
+        I2C_send(ADDR_LCD, buffer_LCD, bytes_written);
+
+    } else {
+        bytes_written = sprintf((char *)buffer_LCD, "%c%s", '@', msg);
+        I2C_send(ADDR_LCD, buffer_LCD, bytes_written);
+    }
+
+    delay_ms(2);
+}
+*/
+
+void display_LCD(char *msg)
+{
+    size_t length = strlen(msg);
+
+    if (length > 16) {
+        char buffer1[18]; // '@' + 16 chars + null
+        char buffer2[2]   = {0x00, 0x0C};
+        char buffer3[18]; // '@' + up to 16 more chars + null
+
+        // 1st: '@' + first 16 characters
+        char line1[17] = {0};
+        strncpy(line1, msg, 16);
+        sprintf(buffer1, "@%s", line1);
+        I2C_send(ADDR_LCD, (uint8_t *)buffer1, strlen(buffer1));
+
+        // 2nd: 0x00 + 0x0C
+        I2C_send(ADDR_LCD, buffer2, sizeof(buffer2));
+
+        // 3rd: '@' + next characters (up to 16)
+        char line2[17] = {0};
+        strncpy(line2, msg + 16, length - 16 > 16 ? 16 : length - 16);
+        sprintf(buffer3, "@%s", line2);
+        I2C_send(ADDR_LCD, (uint8_t *)buffer3, strlen(buffer3));
+    } else {
+        // Just one line to send
+        char buffer1[18];
+        sprintf(buffer1, "@%s", msg);
+        I2C_send(ADDR_LCD, (uint8_t *)buffer1, strlen(buffer1));
+    }
+}
+
+
 
 uint8_t calculate_motors(uint8_t *previous, uint8_t *next)
 {
@@ -274,8 +353,8 @@ main(void) {
     //char msg2[] = "dia";
     char msg3[] = "lokete";
 
-    char msg2[] = "Bon dia lokete";
-    //display_LCD(msg2, 1);
+    char msg2[] = "Bon dia lokete, em dic Joan";
+    display_LCD(msg2);
     
 
     uint8_t stat_prev [4] = {1, 50, 1, 50}; // PREVIOUS: left_dir, left_speed, right_dir, right_speed
@@ -368,7 +447,7 @@ __interrupt void readjoystick(void)
         *m = 'K';
     }
     
-    display_LCD(m, 1);
+    display_LCD(m);
 
     P3IE |= JS_BITS; // Enable JS interrupts
 }
