@@ -10,6 +10,13 @@
 
 // Joystick macros
 #define JS_BITS 0x3D // (BIT0 | BIT2 | BIT3 | BIT4 | BIT5) - P3
+#define JS_L BIT0
+#define JS_R BIT5
+#define JS_F BIT4
+#define JS_B BIT3
+#define JS_SEL BIT2
+
+// LDR macros
 #define LDR 0x31 // (BIT0 | BIT5) - P1
 
 // Motor macros
@@ -30,6 +37,7 @@ uint8_t buffer_i2c [12];
 uint8_t msg [20];
 
 uint8_t menu_level = 0;
+uint8_t js_state = 0;
 
 volatile uint32_t count = 0;
 
@@ -61,8 +69,8 @@ void init_clocks()
     //CSCTL4 = SELMS__DCOCLKDIV | SELA__XT1CLK; // set XT1 (~32768Hz) as ACLK source, ACLK = 32768Hz
     CSCTL4 = SELMS__DCOCLKDIV | SELA__REFOCLK; // set XT1 (~32768Hz) as ACLK source, ACLK = 32768Hz
     // default DCOCLKDIV as MCLK and SMCLK source
-    P1DIR |= BIT0 | BIT1; // set SMCLK, ACLK pin as output
-    P1SEL1 |= BIT0 | BIT1; // set SMCLK and ACLK pin as second function
+    //P1DIR |= BIT0 | BIT1; // set SMCLK, ACLK pin as output
+    //P1SEL1 |= BIT0 | BIT1; // set SMCLK and ACLK pin as second function
     PM5CTL0 &= ~LOCKLPM5; // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings
 }
 
@@ -83,15 +91,17 @@ void init_GPIOs()
     //P5DIR |= BIT2; // Output RST LCD
     P2DIR |= BIT4; // Output RST LCD
 
-    P3REN |= JS_BITS; // Pull R enabled for joystick
-
-    P3OUT |= JS_BITS; // JS pulled down
+    P3REN |= (JS_SEL | JS_B | JS_F | JS_R | JS_L); // JS pulled
+    P3OUT |= (JS_B | JS_F | JS_R | JS_L); // JS directions pulled down
+    P3OUT &= ~JS_SEL; // JS selector pulled up
     //P5OUT &= ~BIT2; // LCD RST Initially set to low
     P2OUT &= ~BIT4; // LCD RST Initially set to low
 
-    //P3IE |= JS_BITS; // Enable JS interrupts
-    //P3IES |= JS_BITS; // JS interrupts on High-to-low transition
     P3IFG &= ~JS_BITS; // Clear JS interrupt flags
+    P3IE &= ~JS_BITS; // Enable JS interrupts
+    P3IES |= JS_SEL; // JS selector High-to-low transition
+    P3IES &= ~(JS_B | JS_F | JS_R | JS_L); // JS directions Low-to-High
+    
 }
 
 void delay_ms(volatile uint32_t temps)
@@ -99,16 +109,6 @@ void delay_ms(volatile uint32_t temps)
     TB0CTL |= (TBCLR | TBSSEL__SMCLK | MC__UP); // CLEAR+SMCLK+UPMODE
     TB0CCTL0 |= CCIE; // Enable interrupts
     while(count<temps);
-    /*
-    while(1) {
-        test = count;
-        br = temps<count;
-        if (br)
-            break;
-        else
-            continue;
-    };
-    */
     TB0CCTL0 &= ~CCIE; // Disable
     TB0CTL &= ~MC__UP;
     count = 0;
@@ -173,8 +173,6 @@ void init_LCD()
     delay_ms(20);
 }
 
-
-/*
 void Init_UART(void)
 {
     UCA0CTLW0 |= UCSWRST; // Fem un reset de la USCI i que estigui â€œinoperativaâ€�
@@ -197,12 +195,8 @@ void Init_UART(void)
     P1SEL1 &= ~(BIT7 | BIT6); // I/O funciÃ³: P1.7 = UART_TX, P1.6 = UART_RX
     UCA0CTLW0 &= ~UCSWRST; // Reactivem la lÃ­nia de comunicacions sÃ¨rie
     UCA0IE |= UCRXIE; // Interrupcions activades per la recepciÃ³ a la UART
-    UCA0IFG &= ~UCRXIFGE; // Per si de cas, esborrem qualsevol activaciÃ³ dâ€™interrupciÃ³ fins ara
+    UCA0IFG &= ~UCRXIFG; // Per si de cas, esborrem qualsevol activaciÃ³ dâ€™interrupciÃ³ fins ara
 }
-*/
-
-
-
 
 // InterfÃ­cie
 void LEDs(uint8_t color_left, uint8_t color_right)
@@ -233,8 +227,6 @@ void fotodetectors(uint8_t *buffer_out)
     I2C_receive(ADDR_ROBOT, buffer_out, 1);
 }
 
-
-
 /*
 1- RST del display: commutar el GPIO RST_LCD, esperar uns ms i tornar a commutar el GPIO
 2- Enviar comandaments I2C de la rutina ASSEMBLY
@@ -244,59 +236,6 @@ Aquesta funciÃ³ ens guarda els valors ASCII a dins el buffer "msg", byte a byt
 L'@ es posa al principi ja que es correspon en codi HEX (0x40) amb la comanda que
 necessita el display per mostrar text.
 */
-/*
-void display_LCD(char *msg, uint8_t length)
-{
-    uint8_t buffer_LCD[33];
-    sprintf(buffer_LCD, "%c%s", '@', msg);
-    I2C_send(ADDR_LCD, buffer_LCD, length+1);
-    delay_ms(2);
-}
-
-void display_LCD(char *msg, uint8_t length)
-{
-    uint8_t buffer_LCD[36]; // 32 + 2x@ + 0x00 + 0xC0
-
-    if (length > 16) {
-        sprintf(buffer_LCD, "%c%s%c%c%c%s", '@', msg[0:15], '\0', 'À', '@', msg[16:length-1]);
-        I2C_send(ADDR_LCD, buffer_LCD, length+6);
-
-    } else {
-        sprintf(buffer_LCD, "%c%s", '@', msg);
-        I2C_send(ADDR_LCD, buffer_LCD, length+1);
-    }
-
-    delay_ms(2);
-}
-*/
-/*
-#include <string.h> // for strlen, strncpy, etc.
-
-void display_LCD(char *msg)
-{
-    uint8_t buffer_LCD[40];
-    int bytes_written = 0;
-    size_t length = strlen(msg);  // Automatically get string length
-
-    if (length > 16) {
-        char line1[17] = {0};
-        char line2[17] = {0};
-
-        strncpy(line1, msg, 16);
-        strncpy(line2, msg + 16, length - 16 > 16 ? 16 : length - 16);
-
-        bytes_written = sprintf((char *)buffer_LCD, "%c%s%c%c%c%s", '@', line1, 0x00, 0xC0, '@', line2);
-        I2C_send(ADDR_LCD, buffer_LCD, bytes_written);
-
-    } else {
-        bytes_written = sprintf((char *)buffer_LCD, "%c%s", '@', msg);
-        I2C_send(ADDR_LCD, buffer_LCD, bytes_written);
-    }
-
-    delay_ms(2);
-}
-*/
-
 void display_LCD(char *msg)
 {
     size_t length = strlen(msg);
@@ -320,6 +259,7 @@ void display_LCD(char *msg)
         strncpy(line2, msg + 16, length - 16 > 16 ? 16 : length - 16);
         sprintf(buffer3, "@%s", line2);
         I2C_send(ADDR_LCD, (uint8_t *)buffer3, strlen(buffer3));
+
     } else {
         // Just one line to send
         char buffer1[18];
@@ -327,8 +267,6 @@ void display_LCD(char *msg)
         I2C_send(ADDR_LCD, (uint8_t *)buffer1, strlen(buffer1));
     }
 }
-
-
 
 uint8_t calculate_motors(uint8_t *previous, uint8_t *next)
 {
@@ -415,7 +353,7 @@ main(void) {
     char msg3[] = "lokete";
 
     char msg2[] = "Bon dia lokete, em dic Joan";
-    display_LCD(msg2);
+    // display_LCD(msg2);
     
 
     uint8_t stat_prev [4] = {1, 50, 1, 50}; // PREVIOUS: left_dir, left_speed, right_dir, right_speed
@@ -423,13 +361,13 @@ main(void) {
     uint8_t leds_state = 0;
 
     // Init motors
-    motors(stat_prev[0], stat_prev[1], stat_prev[2], stat_prev[3]);
+    //motors(stat_prev[0], stat_prev[1], stat_prev[2], stat_prev[3]);
 
     uint8_t i = 0;
     while(1){
         leds_state = calculate_motors(stat_prev, stat_next);
         delay_ms(1);
-        motors(stat_next[0], stat_next[1], stat_next[2], stat_next[3]);
+        //motors(stat_next[0], stat_next[1], stat_next[2], stat_next[3]);
         delay_ms(1);
 
         switch (leds_state)
@@ -484,9 +422,38 @@ __interrupt void timerB0_0_isr(void)
 __interrupt void readjoystick(void)
 {
     P3IE &= ~JS_BITS; // Disable JS interrupts
+    uint8_t flag_P3 = P3IV;
     P3IFG &= ~JS_BITS; // CLEAR FLAG
 
     char m[1] = 'A';
+    switch (flag_P3)
+    {
+        case JS_SEL:
+            *m = '0';
+            break;
+
+        case JS_F:
+            *m = '1';
+            break;
+
+        case JS_B:
+            *m = '2';
+            break;
+
+        case JS_R:
+            *m = '3';
+            break;
+
+        case JS_L:
+            *m = '4';
+            break;
+
+        default:
+            *m = 'K';
+            break;
+    }
+
+    /*
     uint8_t JS_value = P3IN & JS_BITS; // Read joystick state
 
     if (JS_value == BIT2)
@@ -507,6 +474,7 @@ __interrupt void readjoystick(void)
     } else {
         *m = 'K';
     }
+    */
     
     display_LCD(m);
 
