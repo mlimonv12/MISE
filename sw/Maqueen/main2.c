@@ -9,7 +9,8 @@
 #define ADDR_LCD 0x3E
 
 // Joystick macros
-#define JS_BITS 0x3D //(BIT0 | BIT2 | BIT3 | BIT4 | BIT5)
+#define JS_BITS 0x3D // (BIT0 | BIT2 | BIT3 | BIT4 | BIT5) - P3
+#define LDR 0x31 // (BIT0 | BIT5) - P1
 
 // Motor macros
 #define STRAIGHT 0
@@ -30,7 +31,7 @@ uint8_t msg [20];
 
 uint8_t menu_level = 0;
 
-uint32_t count = 0;
+volatile uint32_t count = 0;
 
 /**
  * main.c
@@ -41,14 +42,16 @@ void init_clocks()
 { // Configure one FRAM waitstate as required by the device datasheet for MCLK operation beyond 8MHz before configuring the clock system
     FRCTL0 = FRCTLPW | NWAITS_1;
     P2SEL1 |= BIT6 | BIT7; // P2.6~P2.7: crystal pins
+    /*
     do
     {
     CSCTL7 &= ~(XT1OFFG | DCOFFG); // Clear XT1 and DCO fault flag
     SFRIFG1 &= ~OFIFG;
     } while (SFRIFG1 & OFIFG); // Test oscillator fault flag
-
+    */
     __bis_SR_register(SCG0); // disable FLL
-    CSCTL3 |= SELREF__XT1CLK; // Set XT1 as FLL reference source
+    //CSCTL3 |= SELREF__XT1CLK; // Set XT1 as FLL reference source
+    CSCTL3 |= SELA__REFOCLK;
     //CSCTL1 = DCOFTRIMEN_1 | DCOFTRIM0 | DCOFTRIM1 | DCORSEL_5; // DCOFTRIM=5, DCO Range = 16MHz**
     CSCTL1 = DCORSEL_5; // DCOFTRIM=5, DCO Range = 16MHz
     CSCTL2 = FLLD_0 + 487; // DCOCLKDIV = 16MHz
@@ -56,7 +59,7 @@ void init_clocks()
     __bic_SR_register(SCG0); // enable FLL
     //Software_Trim(); // Software Trim to get the best DCOFTRIM value**
     //CSCTL4 = SELMS__DCOCLKDIV | SELA__XT1CLK; // set XT1 (~32768Hz) as ACLK source, ACLK = 32768Hz
-    CSCTL4 = SELMS__DCOCLKDIV | SELA__REFO; // set XT1 (~32768Hz) as ACLK source, ACLK = 32768Hz
+    CSCTL4 = SELMS__DCOCLKDIV | SELA__REFOCLK; // set XT1 (~32768Hz) as ACLK source, ACLK = 32768Hz
     // default DCOCLKDIV as MCLK and SMCLK source
     P1DIR |= BIT0 | BIT1; // set SMCLK, ACLK pin as output
     P1SEL1 |= BIT0 | BIT1; // set SMCLK and ACLK pin as second function
@@ -66,43 +69,57 @@ void init_clocks()
 void init_timers()
 {
     TB0CCR0 = 16000; // 16000 cycles = 0.001s = 1ms
-    TB0CTL |= (TBCLR | TBSSEL__SMCLK | MC__UP); // CLEAR+SMCLK+UPMODE
+    TB0CTL |= (TBCLR | TBSSEL__SMCLK);// | MC__UP); // CLEAR+SMCLK+UPMODE
     TB0CCTL0 &= ~CCIE; // INTERRUPTS
 }
 
 void init_GPIOs()
 {
     P3SEL0 &= ~JS_BITS; // Initialize all ports on primary function (GPIO)
-    P5SEL1 &= ~BIT2; // 
+    //P5SEL1 &= ~BIT2;
+    P2SEL0 &= ~BIT4;
 
     P3DIR &= ~JS_BITS; // Joystick inputs
-    P5DIR |= BIT2; // Output RST LCD
+    //P5DIR |= BIT2; // Output RST LCD
+    P2DIR |= BIT4; // Output RST LCD
 
     P3REN |= JS_BITS; // Pull R enabled for joystick
 
     P3OUT |= JS_BITS; // JS pulled down
-    P5OUT &= ~BIT2; // LCD RST Initially set to low
+    //P5OUT &= ~BIT2; // LCD RST Initially set to low
+    P2OUT &= ~BIT4; // LCD RST Initially set to low
 
-    P3IE |= JS_BITS; // Enable JS interrupts
-    P3IES |= JS_BITS; // JS interrupts on High-to-low transition
+    //P3IE |= JS_BITS; // Enable JS interrupts
+    //P3IES |= JS_BITS; // JS interrupts on High-to-low transition
     P3IFG &= ~JS_BITS; // Clear JS interrupt flags
 }
 
-void delay_ms(uint32_t temps)
+void delay_ms(volatile uint32_t temps)
 { //temps en ms
     TB0CTL |= (TBCLR | TBSSEL__SMCLK | MC__UP); // CLEAR+SMCLK+UPMODE
     TB0CCTL0 |= CCIE; // Enable interrupts
-    count = 0;
     while(count<temps);
-    TB0CCTL0 &= ~CCIE; // Disable interrupts
+    /*
+    while(1) {
+        test = count;
+        br = temps<count;
+        if (br)
+            break;
+        else
+            continue;
+    };
+    */
+    TB0CCTL0 &= ~CCIE; // Disable
+    TB0CTL &= ~MC__UP;
+    count = 0;
 }
 
 void init_i2c()
 {
     //P4SEL0 |= BIT7 + BIT6; * // P4.6 SDA i P4.7 SCL com a USCI si fem server USCI B1
     P1SEL0 |= BIT3 + BIT2; // P1.2 SDA i P1.3 SCL com a USCI si fem server USCI B0
-    UCB0CTLW0 |= UCSWRST; // Aturem el mòdul
-    //El configurem com a master, síncron i mode i2c, per defecte, està en single-master mode
+    UCB0CTLW0 |= UCSWRST; // Aturem el mÃ²dul
+    //El configurem com a master, sÃ­ncron i mode i2c, per defecte, estÃ  en single-master mode
     UCB0CTLW0 |= UCMST + UCMODE_3 + UCSSEL_2; // Use SMCLK,
     UCB0BR0 = 160; // fSCL = SMCLK(16MHz)/160 = ~100kHz
     UCB0BR1 = 0;
@@ -112,27 +129,27 @@ void init_i2c()
 
 
 // I2C
-//Envia una sèrie de "n_dades" a la adreça "addr" del I2C
+//Envia una sÃ¨rie de "n_dades" a la adreÃ§a "addr" del I2C
 void I2C_send(uint8_t addr, uint8_t *buffer, uint8_t n_dades)
 {
-    UCB0I2CSA = addr; //Coloquem l’adreça de slave
-    PTxData = buffer; //adreça del bloc de dades a transmetre
-    TXByteCtr = n_dades; //carreguem el número de dades a transmetre;
-    UCB0CTLW0 |= UCTR + UCTXSTT; //I2C en mode TX, enviem la condició de start
+    UCB0I2CSA = addr; //Coloquem lâ€™adreÃ§a de slave
+    PTxData = buffer; //adreÃ§a del bloc de dades a transmetre
+    TXByteCtr = n_dades; //carreguem el nÃºmero de dades a transmetre;
+    UCB0CTLW0 |= UCTR + UCTXSTT; //I2C en mode TX, enviem la condiciÃ³ de start
     __bis_SR_register(LPM0_bits + GIE); //Entrem a mode LPM0, enable interrupts
     __no_operation(); //Resta en mode LPM0 fins que es trasmetin les dades
-    while (UCB0CTLW0 & UCTXSTP); //Ens assegurem que s'ha enviat la condició de stop
+    while (UCB0CTLW0 & UCTXSTP); //Ens assegurem que s'ha enviat la condiciÃ³ de stop
 }
  
 void I2C_receive(uint8_t addr, uint8_t *buffer, uint8_t n_dades)
 {
     RX_end = 0;
-    PRxData = buffer; //adreça del buffer on ficarem les dades rebudes
-    RXByteCtr = n_dades; //carreguem el número de dades a rebre
-    UCB0I2CSA = addr; //Coloquem l’adreça de slave
-    UCB0CTLW0 &= ~UCTR; //I2C en mode Recepció
-    while (UCB0CTLW0 & UCTXSTP); //Ens assegurem que el bus està en stop
-    UCB0CTLW0 |= UCTXSTT; //I2C start condition en recepció
+    PRxData = buffer; //adreÃ§a del buffer on ficarem les dades rebudes
+    RXByteCtr = n_dades; //carreguem el nÃºmero de dades a rebre
+    UCB0I2CSA = addr; //Coloquem lâ€™adreÃ§a de slave
+    UCB0CTLW0 &= ~UCTR; //I2C en mode RecepciÃ³
+    while (UCB0CTLW0 & UCTXSTP); //Ens assegurem que el bus estÃ  en stop
+    UCB0CTLW0 |= UCTXSTT; //I2C start condition en recepciÃ³
     __bis_SR_register(LPM0_bits + GIE); //Entrem en mode LPM0, enable interrupts
     __no_operation(); // Resta en mode LPM0 fins que es rebin totes les dades
 }
@@ -140,10 +157,10 @@ void I2C_receive(uint8_t addr, uint8_t *buffer, uint8_t n_dades)
 void init_LCD()
 {
     uint8_t buffer_i2c[8];
-    P5OUT &= ~BIT2;
-    delay_ms(10);
-    P5OUT |= BIT2;
-    delay_ms(10);
+    P2OUT &= ~BIT4;
+    delay_ms(20);
+    P2OUT |= BIT4;
+    delay_ms(20);
     buffer_i2c[0] = 0x00;
     buffer_i2c[1] = 0x39;
     buffer_i2c[2] = 0x14;
@@ -153,40 +170,41 @@ void init_LCD()
     buffer_i2c[6] = 0x0C;
     buffer_i2c[7] = 0x01;
     I2C_send(ADDR_LCD, buffer_i2c, 8); // Provar d'encendre display
+    delay_ms(20);
 }
 
 
-
+/*
 void Init_UART(void)
 {
-UCA0CTLW0 |= UCSWRST; // Fem un reset de la USCI i que estigui “inoperativa”
-UCA0CTLW0 |= UCSSEL__SMCLK;
-// UCSYNC=0 mode asíncron
-// UCMODEx=0 seleccionem mode UART
-// UCSPB=0 nomes 1 stop bit
-// UC7BIT=0 8 bits de dades
-// UCMSB=0 bit de menys pes primer
-// UCPAR=x no es fa servir bit de paritat
-// UCPEN=0 sense bit de paritat
-// Triem SMCLK (16MHz) com a font del clock BRCLK
-UCA0MCTLW = UCOS16; // oversampling => bit 0 = UCOS16 = 1.
-UCA0BRW = 8; // Prescaler de BRCLK
-UCA0MCTLW |= (8 << 4); // Desem el valor 10 al camp UCBRFx del registre, first modulation stage select
-// ELS CÀLCULS EM DONEN 8, INICIALMENT DEIA 10?
-UCA0MCTLW |= (0xF7 << 8); // Desem el valor 0xF7 al camp UCBRS0 del registre,
-                            // Config. corresponent a la part fraccional de N (second modulation stage select)
-P1SEL0 |= BIT7 | BIT6; // I/O funció: P1.7 = UART_TX, P1.6 = UART_RX
-P1SEL1 &= ~(BIT7 | BIT6); // I/O funció: P1.7 = UART_TX, P1.6 = UART_RX
-UCA0CTLW0 &= ~UCSWRST; // Reactivem la línia de comunicacions sèrie
-UCA0IE |= UCRXIE; // Interrupcions activades per la recepció a la UART
-UCA0IFG &= ~UCRXIFGE; // Per si de cas, esborrem qualsevol activació d’interrupció fins ara
+    UCA0CTLW0 |= UCSWRST; // Fem un reset de la USCI i que estigui â€œinoperativaâ€�
+    UCA0CTLW0 |= UCSSEL__SMCLK;
+    // UCSYNC=0 mode asÃ­ncron
+    // UCMODEx=0 seleccionem mode UART
+    // UCSPB=0 nomes 1 stop bit
+    // UC7BIT=0 8 bits de dades
+    // UCMSB=0 bit de menys pes primer
+    // UCPAR=x no es fa servir bit de paritat
+    // UCPEN=0 sense bit de paritat
+    // Triem SMCLK (16MHz) com a font del clock BRCLK
+    UCA0MCTLW = UCOS16; // oversampling => bit 0 = UCOS16 = 1.
+    UCA0BRW = 8; // Prescaler de BRCLK
+    UCA0MCTLW |= (8 << 4); // Desem el valor 10 al camp UCBRFx del registre, first modulation stage select
+    // ELS CÃ€LCULS EM DONEN 8, INICIALMENT DEIA 10?
+    UCA0MCTLW |= (0xF7 << 8); // Desem el valor 0xF7 al camp UCBRS0 del registre,
+                                // Config. corresponent a la part fraccional de N (second modulation stage select)
+    P1SEL0 |= BIT7 | BIT6; // I/O funciÃ³: P1.7 = UART_TX, P1.6 = UART_RX
+    P1SEL1 &= ~(BIT7 | BIT6); // I/O funciÃ³: P1.7 = UART_TX, P1.6 = UART_RX
+    UCA0CTLW0 &= ~UCSWRST; // Reactivem la lÃ­nia de comunicacions sÃ¨rie
+    UCA0IE |= UCRXIE; // Interrupcions activades per la recepciÃ³ a la UART
+    UCA0IFG &= ~UCRXIFGE; // Per si de cas, esborrem qualsevol activaciÃ³ dâ€™interrupciÃ³ fins ara
 }
+*/
 
 
 
 
-
-// Interfície
+// InterfÃ­cie
 void LEDs(uint8_t color_left, uint8_t color_right)
 {
     uint8_t buffer_in [3];
@@ -221,8 +239,8 @@ void fotodetectors(uint8_t *buffer_out)
 1- RST del display: commutar el GPIO RST_LCD, esperar uns ms i tornar a commutar el GPIO
 2- Enviar comandaments I2C de la rutina ASSEMBLY
 
-Per escriure un string, es pot fer servir la funció "sprint(msg, "@Hola com estas?")".
-Aquesta funció ens guarda els valors ASCII a dins el buffer "msg", byte a byte.
+Per escriure un string, es pot fer servir la funciÃ³ "sprint(msg, "@Hola com estas?")".
+Aquesta funciÃ³ ens guarda els valors ASCII a dins el buffer "msg", byte a byte.
 L'@ es posa al principi ja que es correspon en codi HEX (0x40) amb la comanda que
 necessita el display per mostrar text.
 */
@@ -240,7 +258,7 @@ void display_LCD(char *msg, uint8_t length)
     uint8_t buffer_LCD[36]; // 32 + 2x@ + 0x00 + 0xC0
 
     if (length > 16) {
-        sprintf(buffer_LCD, "%c%s%c%c%c%s", '@', msg[0:15], '\0', '�', '@', msg[16:length-1]);
+        sprintf(buffer_LCD, "%c%s%c%c%c%s", '@', msg[0:15], '\0', 'À', '@', msg[16:length-1]);
         I2C_send(ADDR_LCD, buffer_LCD, length+6);
 
     } else {
@@ -378,6 +396,17 @@ main(void) {
     init_GPIOs();
 
     LEDs(5, 5);
+    delay_ms(1000);
+    LEDs(6, 6);
+    delay_ms(1000);
+    LEDs(5, 5);
+    delay_ms(1000);
+    LEDs(6, 6);
+    delay_ms(1000);
+    LEDs(5, 5);
+    delay_ms(1000);
+    LEDs(6, 6);
+    delay_ms(1000);
 
     init_LCD();
 
@@ -394,13 +423,13 @@ main(void) {
     uint8_t leds_state = 0;
 
     // Init motors
-    //motors(stat_prev[0], stat_prev[1], stat_prev[2], stat_prev[3]);
+    motors(stat_prev[0], stat_prev[1], stat_prev[2], stat_prev[3]);
 
     uint8_t i = 0;
     while(1){
         leds_state = calculate_motors(stat_prev, stat_next);
         delay_ms(1);
-        // motors(stat_next[0], stat_next[1], stat_next[2], stat_next[3]);
+        motors(stat_next[0], stat_next[1], stat_next[2], stat_next[3]);
         delay_ms(1);
 
         switch (leds_state)
@@ -535,13 +564,13 @@ __interrupt void ISR_USCI_I2C(void)
             /*
             if (RXByteCtr)
             {
-                *PRxData++ = UCB0RXBUF; // Mou la dada rebuda a l’adreça PRxData
-                if (RXByteCtr == 1) { // Queda només una?
+                *PRxData++ = UCB0RXBUF; // Mou la dada rebuda a lâ€™adreÃ§a PRxData
+                if (RXByteCtr == 1) { // Queda nomÃ©s una?
                     UCB0CTLW0 |= UCTXSTP; // Genera I2C stop condition
                 }
                 RXByteCtr--; // Decrement RX byte counter
             } else {
-                //*PRxData++ = UCB0RXBUF; // Mou la dada rebuda a l’adreça PRxData
+                //*PRxData++ = UCB0RXBUF; // Mou la dada rebuda a lâ€™adreÃ§a PRxData
                 UCB0IFG &= ~UCRXIFG; // Clear USCI_B1 TX int flag
                 __bic_SR_register_on_exit(LPM0_bits); // Exit del mode baix consum LPM0, activa la CPU
             }
