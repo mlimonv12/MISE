@@ -98,7 +98,7 @@ void init_GPIOs()
     P2OUT &= ~BIT4; // LCD RST Initially set to low
 
     P3IFG &= ~JS_BITS; // Clear JS interrupt flags
-    P3IE &= ~JS_BITS; // Enable JS interrupts
+    P3IE |= JS_BITS; // Enable JS interrupts
     P3IES |= JS_SEL; // JS selector High-to-low transition
     P3IES &= ~(JS_B | JS_F | JS_R | JS_L); // JS directions Low-to-High
     
@@ -423,9 +423,11 @@ __interrupt void readjoystick(void)
 {
     P3IE &= ~JS_BITS; // Disable JS interrupts
     uint8_t flag_P3 = P3IV;
+    uint8_t JS_value = P3IN & JS_BITS; // Read joystick state
     P3IFG &= ~JS_BITS; // CLEAR FLAG
 
     char m[1] = 'A';
+    /*
     switch (flag_P3)
     {
         case JS_SEL:
@@ -452,9 +454,7 @@ __interrupt void readjoystick(void)
             *m = 'K';
             break;
     }
-
-    /*
-    uint8_t JS_value = P3IN & JS_BITS; // Read joystick state
+*/
 
     if (JS_value == BIT2)
     {
@@ -474,7 +474,6 @@ __interrupt void readjoystick(void)
     } else {
         *m = 'K';
     }
-    */
     
     display_LCD(m);
 
