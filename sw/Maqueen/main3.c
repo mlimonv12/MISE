@@ -2,6 +2,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include "./Llibreries_modul_wifi/AT.h"
+#include "./Llibreries_modul_wifi/uart_alumnos.h"
+#include "./Llibreries_modul_wifi/recursos.h"
 //#include <intrinsics.h>
 //#include <Energia.h>
 
@@ -173,6 +176,7 @@ void init_LCD()
     delay_ms(20);
 }
 
+/*
 void Init_UART(void)
 {
     UCA0CTLW0 |= UCSWRST; // Fem un reset de la USCI i que estigui â€œinoperativaâ€�
@@ -197,6 +201,7 @@ void Init_UART(void)
     UCA0IE |= UCRXIE; // Interrupcions activades per la recepciÃ³ a la UART
     UCA0IFG &= ~UCRXIFG; // Per si de cas, esborrem qualsevol activaciÃ³ dâ€™interrupciÃ³ fins ara
 }
+*/
 
 // InterfÃ­cie
 void LEDs(uint8_t color_left, uint8_t color_right)
@@ -332,6 +337,7 @@ main(void) {
     init_timers();
     init_i2c();
     init_GPIOs();
+    init_uart_wifi();
 
     LEDs(5, 5);
     delay_ms(1000);
@@ -345,6 +351,7 @@ main(void) {
     delay_ms(1000);
     LEDs(6, 6);
     delay_ms(1000);
+    volatile uint8_t at = comando_AT();
 
     init_LCD();
 
