@@ -206,21 +206,6 @@ void clear_LCD()
 
 
 
-
-void clear_LCD()
-{
-    uint8_t buffer_i2c[3];
-
-    buffer_i2c[0] = 0x00; // Send instruction
-    buffer_i2c[1] = 0x01; // Clear
-    buffer_i2c[2] = 0x03; // Reset cursor position
-
-    I2C_send(ADDR_LCD, buffer_i2c, 3); // Enviar el senyal clear la display
-    delay_ms(20);
-}
-
-
-
 /*
 void Init_UART(void)
 {
