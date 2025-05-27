@@ -13,6 +13,7 @@
 
 // Joystick macros
 #define JS_BITS 0x3D // (BIT0 | BIT2 | BIT3 | BIT4 | BIT5) - P3
+#define JS_ADC 0x12  //  (BIT1 | BIT4) - P1
 #define JS_L BIT0
 #define JS_R BIT5
 #define JS_F BIT4
@@ -20,7 +21,7 @@
 #define JS_SEL BIT2
 
 // LDR macros
-#define LDR 0x31 // (BIT0 | BIT5) - P1
+#define LDR 0x31     // (BIT0 | BIT5) - P1
 
 // Motor macros
 #define STRAIGHT 0
@@ -41,6 +42,7 @@ uint8_t msg [20];
 
 uint8_t menu_level = 0;
 uint8_t js_state = 0;
+uint16_t ADC_value = 0;
 
 volatile uint32_t count = 0;
 
@@ -86,6 +88,19 @@ void init_timers()
 
 void init_GPIOs()
 {
+    // PM1CTL0 &= ~LOCKLPM5; // Disable the GPIO power-on default high-impedance mode
+
+    // Initialize ADC pins
+    P1SEL0 |= (JS_ADC | LDR);
+    P1SEL1 &= ~(JS_ADC | LDR);
+    ADCCTL0 |= ADCON | ADCSHT_2; // Turn on ADC12, S&H=16 clks
+    ADCCTL1 |= ADCSHP; // ADCLK=MODOSC,
+    ADCCTL2 &= ~ADCRES; // clear ADCRES in ADCTL
+    ADCCTL2 |= ADCRES_2; // 12 bits resolution
+    //ADCIE = ADCIE0; // Habilita interrupció
+
+    ADCIFG &= ~(JS_ADC | LDR); // CLEAR FLAG
+
     P3SEL0 &= ~JS_BITS; // Initialize all ports on primary function (GPIO)
     //P5SEL1 &= ~BIT2;
     P2SEL0 &= ~BIT4;
@@ -176,6 +191,36 @@ void init_LCD()
     delay_ms(20);
 }
 
+
+void clear_LCD()
+{
+    uint8_t buffer_i2c[3];
+
+    buffer_i2c[0] = 0x00; // Send instruction
+    buffer_i2c[1] = 0x01; // Clear
+    buffer_i2c[2] = 0x03; // Reset cursor position
+
+    I2C_send(ADDR_LCD, buffer_i2c, 3); // Enviar el senyal clear la display
+    delay_ms(20);
+}
+
+
+
+
+void clear_LCD()
+{
+    uint8_t buffer_i2c[3];
+
+    buffer_i2c[0] = 0x00; // Send instruction
+    buffer_i2c[1] = 0x01; // Clear
+    buffer_i2c[2] = 0x03; // Reset cursor position
+
+    I2C_send(ADDR_LCD, buffer_i2c, 3); // Enviar el senyal clear la display
+    delay_ms(20);
+}
+
+
+
 /*
 void Init_UART(void)
 {
@@ -228,7 +273,7 @@ void fotodetectors(uint8_t *buffer_out)
 {
     uint8_t buffer_in = 0x1D;
     I2C_send(ADDR_ROBOT, &buffer_in, 1);
-    delay_ms(1);
+    delay_ms(2);
     I2C_receive(ADDR_ROBOT, buffer_out, 1);
 }
 
@@ -247,7 +292,7 @@ void display_LCD(char *msg)
 
     if (length > 16) {
         char buffer1[18]; // '@' + 16 chars + null
-        char buffer2[2]   = {0x00, 0x0C};
+        char buffer2[2]   = {0x00, 0xC0};
         char buffer3[18]; // '@' + up to 16 more chars + null
 
         // 1st: '@' + first 16 characters
@@ -331,6 +376,62 @@ uint8_t calculate_motors(uint8_t *previous, uint8_t *next)
     }
 }
 
+
+
+void read_LDRs(uint16_t *LDR_reading){
+
+    ADCIE |= (LDR); // Enable ADC interrupts
+    ADCCTL0 &= ~ADCENC;                 // Desactivar ADC abans de configurar
+    ADCMCTL0 &= ~ADCINCH_15;            // Clear canal anterior
+    ADCMCTL0 |= ADCINCH_0;              // Seleccionem A0
+    ADCCTL0 |= ADCENC | ADCSC;          // Activem conversió
+
+    __bis_SR_register(LPM0_bits + GIE); // Esperem resultat en LPM0
+    __no_operation();
+
+    LDR_reading[0] = ADC_value;
+
+    ADCIE |= (LDR); // Enable ADC interrupts
+    ADCCTL0 &= ~ADCENC;                 // Desactivar ADC abans de configurar
+    ADCMCTL0 &= ~ADCINCH_15;            // Clear canal anterior
+    ADCMCTL0 |= ADCINCH_5;              // Seleccionem A5
+    ADCCTL0 |= ADCENC | ADCSC;          // Activem conversió
+
+    __bis_SR_register(LPM0_bits + GIE); // Esperem resultat en LPM0
+    __no_operation();
+
+    LDR_reading[1] = ADC_value;
+}
+
+
+
+void read_JS(uint16_t *JS_reading){
+
+    ADCIE |= (JS_ADC); // Enable ADC interrupts
+    ADCCTL0 &= ~ADCENC;                 // Desactivar ADC abans de configurar
+    ADCMCTL0 &= ~ADCINCH_15;            // Clear canal anterior
+    ADCMCTL0 |= ADCINCH_1;              // Seleccionem A1
+    ADCCTL0 |= ADCENC | ADCSC;          // Activem conversió
+
+    __bis_SR_register(LPM0_bits + GIE); // Esperem resultat en LPM0
+    __no_operation();
+
+    JS_reading[0] = ADC_value;
+
+    ADCIE |= (JS_ADC); // Enable ADC interrupts
+    ADCCTL0 &= ~ADCENC;                 // Desactivar ADC abans de configurar
+    ADCMCTL0 &= ~ADCINCH_15;            // Clear canal anterior
+    ADCMCTL0 |= ADCINCH_4;              // Seleccionem A4
+    ADCCTL0 |= ADCENC | ADCSC;          // Activem conversió
+
+    __bis_SR_register(LPM0_bits + GIE); // Esperem resultat en LPM0
+    __no_operation();
+
+    JS_reading[1] = ADC_value;
+}
+
+
+
 main(void) {
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     init_clocks();
@@ -340,11 +441,11 @@ main(void) {
     init_uart_wifi();
 
     LEDs(5, 5);
-    delay_ms(1000);
+    delay_ms(500);
     LEDs(6, 6);
-    delay_ms(1000);
+    delay_ms(500);
     LEDs(5, 5);
-    delay_ms(1000);
+    delay_ms(500);
     LEDs(6, 6);
     delay_ms(1000);
     LEDs(5, 5);
@@ -359,8 +460,12 @@ main(void) {
     //char msg2[] = "dia";
     char msg3[] = "lokete";
 
-    char msg2[] = "Bon dia lokete, em dic Joan";
-    // display_LCD(msg2);
+    char msg2[] = "Bon dia         em dic Joan";
+    display_LCD(msg2);
+
+    delay_ms(2000);
+
+    uint16_t LDR_reading [2];
     
 
     uint8_t stat_prev [4] = {1, 50, 1, 50}; // PREVIOUS: left_dir, left_speed, right_dir, right_speed
@@ -376,6 +481,22 @@ main(void) {
         delay_ms(1);
         //motors(stat_next[0], stat_next[1], stat_next[2], stat_next[3]);
         delay_ms(1);
+
+        // Clear display
+        clear_LCD();
+
+        // Llegim LDRs
+        read_JS(LDR_reading);
+
+        // Imprimim el valor d'un dells per pantalla
+        char LDR_msg[] = "";
+        sprintf(LDR_msg, "%d,%d", LDR_reading[0], LDR_reading[1]);
+        display_LCD(LDR_msg);
+
+
+        delay_ms(500);
+
+
 
         switch (leds_state)
         {
@@ -486,6 +607,42 @@ __interrupt void readjoystick(void)
 
     P3IE |= JS_BITS; // Enable JS interrupts
 }
+
+//******************************************************************************
+// ADC interrupt ***************************************************************
+//******************************************************************************
+#pragma vector=ADC_VECTOR
+__interrupt void ADC_ISR(void){
+
+    ADCIE = 0; // Disable ADC interrupts
+
+    /*
+    switch(__even_in_range(ADCIV,ADCIV_ADCIFG)){
+        case ADCIV_NONE:
+            break;
+        case ADCIV_ADCOVIFG:
+            break;
+        case ADCIV_ADCTOVIFG:
+            break;
+        case ADCIV_ADCHIIFG:
+            break;
+        case ADCIV_ADCLOIFG:
+            break;
+        case ADCIV_ADCINIFG:
+            break;
+        case ADCIV_ADCIFG:
+            ADC_value = ADCMEM0; // Read ADC
+            __bic_SR_register_on_exit(LPM0_bits);            // Clear CPUOFF bit from LPM0
+            break;
+        default:break;
+    }
+    */
+    ADC_value = ADCMEM0; // Read ADC
+    __bic_SR_register_on_exit(LPM0_bits);            // Clear CPUOFF bit from LPM0
+    
+    ADCIFG &= ~(JS_ADC | LDR); // CLEAR FLAG
+}
+
 
 //******************************************************************************
 // I2C Interrupt ***************************************************************
