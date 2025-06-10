@@ -342,7 +342,7 @@ main(void) {
     LEDs(5, 5);
     delay_ms(1000);
     LEDs(6, 6);
-    delay_ms(1000);
+    /*delay_ms(1000);
     LEDs(5, 5);
     delay_ms(1000);
     LEDs(6, 6);
@@ -350,7 +350,7 @@ main(void) {
     LEDs(5, 5);
     delay_ms(1000);
     LEDs(6, 6);
-    delay_ms(1000);
+    delay_ms(1000);*/
     volatile uint8_t at = comando_AT();
 
     init_LCD();
