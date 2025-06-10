@@ -35,6 +35,30 @@ void init_uart_wifi(void) //UART configuration: UCA0, 115200bps
     UCA0IFG &= ~UCRXIFG; // Per si de cas, esborrem qualsevol activaciÃ³ dâ€™interrupciÃ³ fins ara
 }
 
+// Global variable to count timer ticks (1 tick = 100us)
+volatile uint32_t timer_ticks = 0;
+
+// Function to initialize Timer A0 for timeout
+void Activa_Timer_Timeout(void) {
+    TB1CTL |= (TBCLR | TBSSEL__SMCLK | MC__UP); // CLEAR+SMCLK+UPMODE
+    TB1CCR0 = 16000;           // 16 MHz / 16000 = 100 kHz (1ms period)
+    TB1CCTL0 |= CCIE;          // Enable interrupt
+    timer_ticks = 0;
+}
+
+// Function to reset the timer count
+void Reset_Timeout(void) {
+    timer_ticks = 0;
+}
+
+// Function to check for timeout
+uint8_t TimeOut(uint32_t timeout_t) {
+    if (timer_ticks >= timeout_t) {
+        return 1; // Timeout occurred
+    } else {
+        return 0; // No timeout
+    }
+}
 
 /*
 RxPacket() read data from UART buffer (received from Wifi module).
@@ -78,49 +102,25 @@ TxPacket() needs 2 parameters:
      Pointer to parameters to send.
  */
 uint8_t TxPacket(uint8_t bParameterLength, const uint8_t *buffer) {
-    uint8_t bytesSent = 0;
-
+    volatile uint8_t bytesSent;
+    bytesSent = 0;
+    _NOP();
     while (bytesSent < bParameterLength) {
         //while (!TXD0_READY); // Wait for TX buffer to be ready
         UCA0TXBUF = buffer[bytesSent++];
+        _NOP();
     }
 
     return bytesSent;
 }
 
-// Global variable to count timer ticks (1 tick = 100us)
-volatile uint32_t timer_ticks = 0;
-
-// Function to initialize Timer A0 for timeout
-void Activa_Timer_Timeout(void) {
-    TB1CTL = TBSSEL__SMCLK | // Select SMCLK (16 MHz)
-             MC__CONTINUOUS |  // Continuous mode
-             TBCLR |           // Clear timer
-             TBIE;             // Enable Timer A interrupt
-
-    TB1CCTL0 = CCIE;          // Enable CCR0 interrupt (for 100us)
-    TB1CCR0 = 1600;           // 16 MHz / 1600 = 10 kHz (100 us period)
-}
-
-// Function to reset the timer count
-void Reset_Timeout(void) {
-    timer_ticks = 0;
-}
-
-// Function to check for timeout
-uint8_t TimeOut(uint32_t timeout_t) {
-    if (timer_ticks >= timeout_t) {
-        return 1; // Timeout occurred
-    } else {
-        return 0; // No timeout
-    }
-}
 
 // Timer A0 interrupt service routine (ISR) - for CCR0
-#pragma vector = TIMER0_B1_VECTOR
-__interrupt void TIMER0_B1_ISR(void) {
-    timer_ticks++;            // Increment the tick counter
-    TB1CCR0 += 1600;         // Add 1600 to CCR0 for the next 100us interval
+#pragma vector = TIMER1_B0_VECTOR
+__interrupt void timerB1_0_isr(void)
+{
+    TB1CTL &= ~CCIFG; // CLEAR FLAG
+    timer_ticks++;
 }
 
 //interrupcion de recepcion en la uart UCA0:

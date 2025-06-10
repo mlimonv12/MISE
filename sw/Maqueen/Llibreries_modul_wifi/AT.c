@@ -85,7 +85,8 @@ uint8_t comando_AT(){
     struct RxATReturn respuesta;
     TxAT(sizeof(test)-1,test);
     //llamada a RxAT() para leer la respuesta:
-    respuesta = RxAT(50);
+    respuesta = RxAT(100);
+    _NOP();
     if(respuesta.num_bytes) //hay una respuesta
         //supondremos que si hay respuesta, tiene que ser "OK"
         return 1; //exito
