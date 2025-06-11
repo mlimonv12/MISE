@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "lcd_control.h": "c",
+        "i2c.h": "c",
+        "at.h": "c",
+        "recursos.h": "c"
+    }
+}
