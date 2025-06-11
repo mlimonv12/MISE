@@ -1,0 +1,15 @@
+"./main.obj"
+"./lib/low_level/AT.obj"
+"./lib/low_level/adc.obj"
+"./lib/low_level/clocks.obj"
+"./lib/low_level/gpio.obj"
+"./lib/low_level/i2c.obj"
+"./lib/low_level/timers.obj"
+"./lib/low_level/uart.obj"
+"./lib/top_level/lcd_control.obj"
+"./lib/top_level/robot_control.obj"
+"./lib/top_level/robot_menu.obj"
+"./lib/top_level/sensor_reading.obj"
+"../lnk_msp430fr2355.cmd"
+-lfrwp_init.a
+-llibc.a

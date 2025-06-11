@@ -22,7 +22,7 @@ typedef struct Conexion {
     uint8_t conID; //'0'...'9' //El identificador de conexion, lo limitaremos a 1 caracter "0"..."9" = 0x30...0x39. Otro valor si no hay conexion activa
 }StrConexion;
 
-uint8_t WiFi_Mode = DEFAULT_MODE; //Modo 1: Station, 2: AP, 3: AP + Station
+uint8_t WiFi_Mode = AP_MODE; //Modo 1: Station, 2: AP, 3: AP + Station
 uint8_t SSID_actual[32]; //El SSID del AP al que estamos conectado.
 
 //Mensajes de comunicacion para uart<->wifi:
@@ -85,7 +85,8 @@ uint8_t comando_AT(){
     struct RxATReturn respuesta;
     TxAT(sizeof(test)-1,test);
     //llamada a RxAT() para leer la respuesta:
-    respuesta = RxAT(50);
+    respuesta = RxAT(100);
+    _NOP();
     if(respuesta.num_bytes) //hay una respuesta
         //supondremos que si hay respuesta, tiene que ser "OK"
         return 1; //exito

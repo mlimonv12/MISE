@@ -5,8 +5,8 @@
 #include "robot_menu.h"
 #include "lcd_control.h"    // For LCD display functions
 #include "robot_control.h"  // For robot_LEDs function
-#include "../low_level/low_level_timers.h" // For delay_ms
-#include "../low_level/low_level_gpio.h"   // For joystick button pressed flags
+#include "../low_level/timers.h" // For delay_ms
+#include "../low_level/gpio.h"   // For joystick button pressed flags
 
 // Menu state global variables (defined here)
 uint8_t currentMenu = MAIN_MENU;

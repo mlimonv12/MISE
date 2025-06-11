@@ -19,6 +19,8 @@
 #include "./lib/top_level/sensor_reading.h"
 #include "./lib/top_level/robot_menu.h" // NEW: Include the menu system
 
+// Variables
+uint8_t i = 0;
 
 /**
  * main.c - Main application entry point
@@ -106,7 +108,7 @@ main(void) {
             }
 
             // Copy the current motor state to the previous state for the next iteration
-            for (uint8_t i = 0; i < 4; i++) {
+            for (i = 0; i < 4; i++) {
                 stat_prev[i] = stat_next[i];
             }
         }

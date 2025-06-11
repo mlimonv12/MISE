@@ -1,7 +1,7 @@
 #include <msp430.h>
 #include "sensor_reading.h"
-#include "../low_level/low_level_adc.h" // For ADC_value, ADC_ISR, init_adc
-#include "../low_level/low_level_gpio.h" // For LDR_PINS and JS_ADC macros to enable/disable ADCIE
+#include "../low_level/adc.h" // For ADC_value, ADC_ISR, init_adc
+#include "../low_level/gpio.h" // For LDR_PINS and JS_ADC macros to enable/disable ADCIE
 
 /**
  * @brief Reads analog values from the two Light Dependent Resistors (LDRs).

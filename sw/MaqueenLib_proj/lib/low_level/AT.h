@@ -14,14 +14,14 @@
  * Esta libreria necesita otra libreria con las funciones especificas de la UART (p. ej "uart_wifi.h"),
  * a programar/adaptar para cada micro, y que contenga las siguientes funciones:
  *
-    RxReturn RxPacket(uint32_t time_out);   //El timeout debería ser un valor en el rango de los ms.
+    RxReturn RxPacket(uint32_t time_out);   //El timeout deberï¿½a ser un valor en el rango de los ms.
                                             //Devuelve una struct con la respuesta recibida.
 
     uint8_t TxPacket(uint8_t bParameterLength, const uint8_t *Parameters);
                       //Los parametros son el numero de bytes a enviar y un puntero a los datos a enviar.
-                      //Devuelve el numero de bytes realmente enviados. Es opcional, podría ser void.
+                      //Devuelve el numero de bytes realmente enviados. Es opcional, podrï¿½a ser void.
  *
- * RxReturn debe ser una struct para almacenar la respuesta, y debe tener como mínimo los siguientes campos
+ * RxReturn debe ser una struct para almacenar la respuesta, y debe tener como mï¿½nimo los siguientes campos
  * para el buen funcionamiento de la libreria AT:
       typedef struct RxReturn
         {
@@ -40,7 +40,7 @@
  * se pueden cambiar, pero se tendran que indicar a la libreria AT,  editando las siguientes lineas,
  * para asignar los nombres reales de vuestra(s) libreria(s) a los nombres que se espera la libreria AT:
  */
-#define LIBUART_AT "uart_alumnos.h" //el nombre de la libreria real de la UART
+#define LIBUART_AT "uart.h" //el nombre de la libreria real de la UART
 #define RxAT RxPacket           //el nombre real de la funcion de recepcion por la UART
 #define TxAT TxPacket           //el nombre real de la funcion de transmision por la UART
 #define RxATReturn RxReturn     //el nombre real de la struct para las respuestas recibidas por la UART
@@ -58,14 +58,14 @@
 
 //2- Si actuamos como servidor de una Wifi ("AP", punto de acceso):
 #define SSID_AP "MiSE" //asi nos llamamos cuando somos servidor (AP)
-#define PWD_AP "c0nTra53nyA"    //cambiar por la contraseña deseada
+#define PWD_AP "c0nTra53nyA"    //cambiar por la contraseï¿½a deseada
 
 #define MODO_STA 1  //Modo 1: Station
 #define MODO_AP 2   //Modo 2: AP
 #define AP_MODE MODO_STA //Modo inicial: cliente ("STA") por defecto.
 
 /*
- *  A partir de aquí, lo que sigue NO se debería alterar!
+ *  A partir de aquï¿½, lo que sigue NO se deberï¿½a alterar!
  */
 
 //Recursos para el ESP-01:
