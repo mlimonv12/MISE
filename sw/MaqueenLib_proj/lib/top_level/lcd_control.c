@@ -145,3 +145,8 @@ void display_LCD(char *msg)
     }
 }
 
+void update_LCD(char *msg) 
+{
+    clear_LCD();
+    display_LCD(msg);
+}

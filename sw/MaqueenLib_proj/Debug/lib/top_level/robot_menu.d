@@ -18,6 +18,7 @@ lib/top_level/robot_menu.obj: C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.
 lib/top_level/robot_menu.obj: ../lib/top_level/robot_menu.h
 lib/top_level/robot_menu.obj: ../lib/top_level/lcd_control.h
 lib/top_level/robot_menu.obj: ../lib/top_level/robot_control.h
+lib/top_level/robot_menu.obj: ../lib/top_level/sensor_reading.h
 lib/top_level/robot_menu.obj: ../lib/low_level/timers.h
 lib/top_level/robot_menu.obj: ../lib/low_level/gpio.h
 
@@ -56,6 +57,8 @@ C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/stdarg.h:
 ../lib/top_level/lcd_control.h:
 
 ../lib/top_level/robot_control.h:
+
+../lib/top_level/sensor_reading.h:
 
 ../lib/low_level/timers.h:
 

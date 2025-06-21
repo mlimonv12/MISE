@@ -1,11 +1,13 @@
 #include <msp430.h>
 #include "gpio.h"
+#include "timers.h" // For delay_ms
 
 // Global flags for joystick button presses, defined here
 volatile uint8_t joystick_up_pressed = 0;
 volatile uint8_t joystick_down_pressed = 0;
 volatile uint8_t joystick_select_pressed = 0;
-volatile uint8_t joystick_back_pressed = 0;
+volatile uint8_t joystick_left_pressed = 0;
+volatile uint8_t joystick_right_pressed = 0;
 
 /**
  * @brief Initializes various General Purpose Input/Output (GPIO) pins.
@@ -32,17 +34,6 @@ void init_GPIOs()
     // Configure pull-up/pull-down resistors for Joystick inputs
     P3REN |= (JS_SEL | JS_B | JS_F | JS_R | JS_L); // Enable pull resistors for all JS pins
 
-    // For joystick directions (F, B, R, L) and Select:
-    // If the button connects the pin to ground (common setup), use pull-up.
-    // If the button connects the pin to VCC, use pull-down.
-    // Based on original code:
-    // P3OUT |= (JS_B | JS_F | JS_R | JS_L); // Set P3OUT to high for directions (pulled up)
-    // P3OUT &= ~JS_SEL; // Set P3OUT to low for selector (pulled down)
-    // This setup means:
-    // - JS_B, JS_F, JS_R, JS_L: Input is high when idle, low when pressed (Active Low via pull-up)
-    // - JS_SEL: Input is low when idle, high when pressed (Active High via pull-down)
-    // We need to re-evaluate the edge detection for consistency. Let's assume active-low for simplicity,
-    // which means all are pulled up and detect high-to-low transition.
     P3OUT |= JS_BITS; // All joystick inputs pulled high (pull-up resistors)
                       // This means buttons should pull the pin to ground when pressed.
 
@@ -80,23 +71,19 @@ __interrupt void readjoystick(void)
     if (!(P3IN & JS_F)) { // If Forward (P3.4) is pressed (goes low)
         joystick_up_pressed = 1;
     }
-    if (!(P3IN & JS_R)) { // If Right (P3.5) is pressed (goes low) -> acting as DOWN in menu
+    if (!(P3IN & JS_B)) { // If Back/down is pressed (goes low) -> acting as DOWN in menu
         joystick_down_pressed = 1;
     }
-    if (!(P3IN & JS_SEL)) { // If Select (P3.2) is pressed (goes low)
+    if (!(P3IN & JS_SEL)) { // If Select is pressed (goes low)
         joystick_select_pressed = 1;
     }
-    if (!(P3IN & JS_B)) { // If Back (P3.3) is pressed (goes low)
-        joystick_back_pressed = 1;
+    if (!(P3IN & JS_L)) { // If Left is pressed (goes low)
+        joystick_left_pressed = 1;
     }
-    if (!(P3IN & JS_L)) { // If Left (P3.0) is pressed (goes low) - currently unused in menu
-        // Could be used for other functions later
+    if (!(P3IN & JS_R)) { // If Right is pressed (goes low) - currently unused in menu
+        joystick_right_pressed = 1;
     }
 
-    // After processing, re-enable Port 3 interrupts.
-    // They are typically enabled after a small debounce delay in the main loop
-    // or by the handler function to prevent rapid multiple detections.
-    // For now, re-enable directly.
     P3IE |= JS_BITS;
 }
 

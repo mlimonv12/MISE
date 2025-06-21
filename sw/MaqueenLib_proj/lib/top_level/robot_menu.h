@@ -3,47 +3,62 @@
 
 #include <stdint.h> // For uint8_t
 
-// Menu states
-#define MAIN_MENU 0
-#define SETTINGS_MENU 1
-#define SPEED_MENU 2
-#define LED_MENU 3
-#define MODE_MENU 4
+// Menu States
+#define MAIN_MENU           0
+#define MODE_MENU           1
+#define SETTINGS_MENU       2
+#define SPEED_MENU          3
+#define LED_COLORS_MENU     4
+#define SINGLE_LED_COLOR_MENU 5
+#define CALIBRATE_LDR_MENU 6
 
 // Global variables for menu state (declared extern)
 extern uint8_t currentMenu;
 extern uint8_t menuIndex;
 extern uint8_t topVisibleIndex;
 
+// Robot state variables
+extern uint8_t robotRunning;
+extern uint8_t ledsOn;
+
 // Mode setting
-#define NUM_MODES 3
+#define NUM_MODES           5
 extern const char* mode_names[NUM_MODES];
-extern uint8_t currentNavigationMode; // The selected navigation mode (0:Free Roam, 1:Light, 2:Dark)
-extern uint8_t navigationMode; // Flag to indicate if robot navigation is active (1: active, 0: inactive)
+extern uint8_t currentNavigationMode;
+extern uint8_t navigationMode;
 
 // Speed settings
-#define NUM_SPEEDS 3
+#define NUM_SPEEDS          4
 extern const char* speed_names[NUM_SPEEDS];
-extern const uint8_t speed_values[NUM_SPEEDS]; // Values used for motor control
+extern const uint8_t speed_values[NUM_SPEEDS];
 extern uint8_t currentSpeedIndex;
-extern uint8_t currentSpeed; // Default to slow speed
+extern uint8_t currentSpeed;
+
+// LDR calibration readings
+extern uint16_t max_light [2];
+extern uint16_t min_light [2];
 
 // LED color settings
-#define NUM_COLORS 8
-extern const char* color_Names[NUM_COLORS];
-extern uint8_t currentColor; // Default to off (0x00) or 0-7 for colors
+//#define NUM_SINGLE_COLORS   7
+//extern const char* color_Names[];
+extern uint8_t currentRightLedColor;
+extern uint8_t currentLeftLedColor;
+extern uint8_t settingRightLed;
 
 // Menu item definitions (declared extern)
 extern const char* main_menu_items[];
 extern const char* settings_menu_items[];
 extern const char* mode_menu_items[];
 extern const char* speed_menu_items[];
-extern const char* led_menu_items[];
+extern const char* led_colors_menu_items[];
+extern const char* single_led_color_menu_items[];
 
 // Current menu pointers (declared extern)
 extern const char** current_menu;
 extern uint8_t current_menu_length;
 
+
+// Function Prototypes
 
 /**
  * @brief Initializes the menu system, setting the initial menu and displaying it.
@@ -57,6 +72,11 @@ void init_menu(void);
 void update_menu_display(void);
 
 /**
+ * @brief Updates the LCD display to show the robot's running state.
+ */
+void update_robot_state_display(void);
+
+/**
  * @brief Updates the LCD display to show the currently selected navigation mode.
  */
 void update_mode_display(void);
@@ -67,21 +87,33 @@ void update_mode_display(void);
 void update_speed_display(void);
 
 /**
- * @brief Updates the LCD display to show the currently selected LED color.
+ * @brief Updates the LCD display to show the currently selected LED color for a single LED.
+ * @param isRightLed Flag to indicate if it's the Right (1) or Left (0) LED.
  */
-void update_led_display(void);
+void update_single_led_display(uint8_t isRightLed);
 
 /**
  * @brief Sets the robot's operating speed.
- * @param speed_id The index of the selected speed (0 for Slow, 1 for Medium, 2 for Fast).
+ * @param speed_id The index of the selected speed.
  */
 void set_robot_speed(uint8_t speed_id);
 
 /**
- * @brief Sets the robot's LED color.
+ * @brief Sets the robot's LED color for a specific LED.
+ * @param isRightLed Flag to indicate if it's the Right (1) or Left (0) LED.
  * @param color_id The index of the selected color.
  */
-void set_led_color(uint8_t color_id);
+void set_single_led_color(uint8_t isRightLed, uint8_t color_id);
+
+/**
+ * @brief Toggles the overall LED state (ON/OFF) for the robot.
+ */
+void toggle_all_leds(void);
+
+/**
+ * @brief Handles going back in the menu hierarchy.
+ */
+void go_back_in_menu(void);
 
 /**
  * @brief Executes the action associated with the selected menu item.
@@ -93,9 +125,8 @@ void execute_menu_action(uint8_t index);
 /**
  * @brief Handles menu navigation based on joystick button presses.
  * This function should be called periodically (e.g., in the main loop)
- * to check for UP, DOWN, and SELECT/BACK button presses and update the menu state.
+ * to check for UP, DOWN, SELECT, and LEFT (BACK) button presses and update the menu state.
  */
 void handle_menu(void);
 
 #endif /* ROBOT_MENU_H_ */
-

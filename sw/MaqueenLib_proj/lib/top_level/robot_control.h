@@ -10,6 +10,8 @@
 #define STOP 3     // Robot should stop (e.g., at a cul-de-sac)
 #define LOST 4     // Robot has lost the line
 
+uint16_t extern ldr_vals [2];
+
 /**
  * @brief Controls the robot's onboard LEDs.
  * Sends I2C commands to set the color of the left and right LEDs.
@@ -47,9 +49,26 @@ void fotodetectors(uint8_t *buffer_out);
  *
  * @param previous Pointer to an array containing the previous motor directions and speeds.
  * @param next Pointer to an array where the calculated next motor directions and speeds will be stored.
+ * @param speed Value for the max speed
  * @return A uint8_t value representing the robot's calculated state (e.g., STRAIGHT, TURN_R, STOP).
  */
-uint8_t calculate_motors(uint8_t *previous, uint8_t *next);
+uint8_t linetrack_motors(uint8_t *previous, uint8_t *next, uint8_t speed);
+
+/**
+ * @brief Executes the whole line tracking algorithm
+ *
+ * @param speed Value for the max speed
+ * @return A uint8_t value representing the robot's calculated state (e.g., STRAIGHT, TURN_R, STOP).
+ */
+void linetrack(uint8_t speed);
+
+uint8_t follow_motors(uint8_t *previous, uint8_t *next, uint8_t speed, uint16_t *max_light, uint16_t *min_light);
+
+void follow_light(uint8_t speed, uint16_t *max_light, uint16_t *min_light);
+
+uint8_t escape_motors(uint8_t *previous, uint8_t *next, uint8_t speed, uint16_t *max_light, uint16_t *min_light);
+
+void escape_light(uint8_t speed, uint16_t *max_light, uint16_t *min_light);
 
 #endif /* ROBOT_CONTROL_H_ */
 

@@ -20,7 +20,7 @@
 #include "./lib/top_level/robot_menu.h" // NEW: Include the menu system
 
 // Variables
-uint8_t i = 0;
+//uint8_t i = 0;
 
 /**
  * main.c - Main application entry point
@@ -41,6 +41,8 @@ main(void) {
     robot_LEDs(5, 5);   // Set initial LED colors
     delay_ms(500);      // Wait for 500ms
     robot_LEDs(6, 6);   // Change LED colors
+    delay_ms(500);      // Wait for 500ms
+    robot_LEDs(0, 0);   // Change LED colors
 
     // Attempt to communicate with AT module (e.g., Wi-Fi module)
     volatile uint8_t at = comando_AT(); // Stores the result of AT command, though not used further
@@ -61,62 +63,41 @@ main(void) {
     while(1){
         // Handle menu interactions (joystick presses)
         handle_menu();
+        delay_ms(100); // Small delay for overall loop cycle
+        __no_operation(); // Placeholder for breakpoint during debugging
 
         // If in "Start" (navigation) mode, execute line-following logic
         // The `navigationMode` variable is handled by the menu system.
         if (navigationMode) {
-            // Calculate the next motor commands based on photodetector readings
-            leds_state = calculate_motors(stat_prev, stat_next);
-            delay_ms(1); // Small delay
 
-            // Apply the calculated motor commands to the robot
-            motors(stat_next[0], stat_next[1], stat_next[2], stat_next[3]);
-            delay_ms(1); // Small delay
-
-            clear_LCD(); // Clear the LCD display for sensor readings
-
-            // Read Light Dependent Resistors (LDRs)
-            read_LDRs(LDR_reading); // Store LDR values into LDR_reading array
-
-            // Format and display the LDR values on the LCD
-            char LDR_msg[16]; // Buffer for LDR message (e.g., "1023,512")
-            sprintf(LDR_msg, "%d,%d", LDR_reading[0], LDR_reading[1]);
-            display_LCD(LDR_msg); // Display on first line
-
-            delay_ms(500); // Wait for half a second before next iteration
-
-            // Update robot LEDs based on the calculated movement state
-            switch (leds_state)
+            switch (currentNavigationMode)
             {
-            case STRAIGHT: // Robot moving straight
-                robot_LEDs(2, 2); // Green-ish LEDs
+            case 0: // Follow light
+                //follow_light(currentSpeed, )
                 break;
-            case TURN_L: // Robot turning left
-                robot_LEDs(2, 3); // Green-ish left, Yellow-ish right
+            
+            case 1: // Escape light
                 break;
-            case TURN_R: // Robot turning right
-                robot_LEDs(3, 2); // Yellow-ish left, Green-ish right
+
+            case 2: // Line track
+                linetrack(currentSpeed);
                 break;
-            case STOP: // Robot stopped
-                robot_LEDs(1, 1); // Red LEDs
+
+            case 3: // Wi-fi control
                 break;
-            case LOST: // Robot lost the line
-                robot_LEDs(4, 4); // Blue LEDs
+
+            case 4: // Joystick control
                 break;
+
             default:
                 break;
             }
+            // Calculate the next motor commands based on photodetector readings
+            //leds_state = calculate_motors(stat_prev, stat_next);
+            // Read Light Dependent Resistors (LDRs)
+            read_LDRs(LDR_reading); // Store LDR values into LDR_reading array
 
-            // Copy the current motor state to the previous state for the next iteration
-            for (i = 0; i < 4; i++) {
-                stat_prev[i] = stat_next[i];
-            }
         }
-        // If not in navigation mode, ensure the menu is displayed (handle_menu does this)
-        // and allow other background tasks if any.
-
-        delay_ms(100); // Small delay for overall loop cycle
-        __no_operation(); // Placeholder for breakpoint during debugging
     }
 }
 

@@ -18,6 +18,7 @@ lib/low_level/gpio.obj: C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LT
 lib/low_level/gpio.obj: C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/machine/_types.h
 lib/low_level/gpio.obj: C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/machine/_stdint.h
 lib/low_level/gpio.obj: C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/_stdint.h
+lib/low_level/gpio.obj: ../lib/low_level/timers.h
 
 ../lib/low_level/gpio.c:
 
@@ -54,4 +55,6 @@ C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/machine/_types
 C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/machine/_stdint.h:
 
 C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/_stdint.h:
+
+../lib/low_level/timers.h:
 

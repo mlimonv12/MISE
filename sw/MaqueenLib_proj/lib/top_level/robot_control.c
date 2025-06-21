@@ -2,8 +2,16 @@
 #include <stdint.h>
 
 #include "robot_control.h"
+#include "sensor_reading.h"
 #include "../low_level/i2c.h"    // For I2C_send, I2C_receive, ADDR_ROBOT
 #include "../low_level/timers.h" // For delay_ms
+
+uint8_t motors_prev [4] = {1, 0, 1, 0}; // PREVIOUS: left_dir, left_speed, right_dir, right_speed
+uint8_t motors_next [4]; // NEXT: left_dir, left_speed, right_dir, right_speed
+uint8_t leds_state = 0;
+uint16_t ldr_vals [2];
+
+uint8_t i = 0;
 
 /**
  * @brief Controls the robot's onboard LEDs.
@@ -91,7 +99,7 @@ void fotodetectors(uint8_t *buffer_out)
  * Format: {left_dir, left_speed, right_dir, right_speed}
  * @return A uint8_t value representing the robot's calculated state (e.g., STRAIGHT, TURN_R, STOP).
  */
-uint8_t calculate_motors(uint8_t *previous, uint8_t *next)
+uint8_t linetrack_motors(uint8_t *previous, uint8_t *next, uint8_t speed)
 {
     uint8_t stat; // Variable to hold the photodetector status
     fotodetectors(&stat); // Obtain photodetector data
@@ -119,8 +127,8 @@ uint8_t calculate_motors(uint8_t *previous, uint8_t *next)
         // Both front center photodetectors are on the line
         next[0] = 1; // Enable left motor (direction 1: forward)
         next[2] = 1; // Enable right motor
-        next[1] = 50; // Set left speed
-        next[3] = 50; // Set right speed
+        next[1] = speed; // Set left speed
+        next[3] = speed; // Set right speed
 
         return STRAIGHT; // Return STRAIGHT state
     }
@@ -132,7 +140,7 @@ uint8_t calculate_motors(uint8_t *previous, uint8_t *next)
         next[0] = 1; // Enable left motor (forward)
         next[2] = 1; // Enable right motor (forward)
         next[1] = 0; // Slow down left motor (or stop it for sharper turn)
-        next[3] = 50; // Keep right motor speed
+        next[3] = speed; // Keep right motor speed
 
         return TURN_R; // Return TURN_R state
     }
@@ -143,7 +151,7 @@ uint8_t calculate_motors(uint8_t *previous, uint8_t *next)
         // Adjust speed to turn left (keep left speed, slow down right)
         next[0] = 1; // Enable left motor (forward)
         next[2] = 1; // Enable right motor (forward)
-        next[1] = 50; // Keep left motor speed
+        next[1] = speed; // Keep left motor speed
         next[3] = 0; // Slow down right motor (or stop it)
 
         return TURN_L; // Return TURN_L state
@@ -152,8 +160,8 @@ uint8_t calculate_motors(uint8_t *previous, uint8_t *next)
         // Robot is off the line or in an unhandled state, stop or perform recovery.
         // Original code had both speeds at 35, then direction 1 (forward).
         // This implies a slow forward search or stop.
-        next[1] = 35; // Set left speed to low value
-        next[3] = 35; // Set right speed to low value
+        next[1] = speed*0.7; // Set left speed to low value
+        next[3] = speed*0.7; // Set right speed to low value
         next[0] = 1; // Set left motor direction to forward
         next[2] = 1; // Set right motor direction to forward
 
@@ -161,3 +169,130 @@ uint8_t calculate_motors(uint8_t *previous, uint8_t *next)
     }
 }
 
+/**
+ * @brief Executes the whole line tracking algorithm
+ *
+ * @param speed Value for the max speed
+ * @return A uint8_t value representing the robot's calculated state (e.g., STRAIGHT, TURN_R, STOP).
+ */
+void linetrack(uint8_t speed)
+{
+    leds_state = linetrack_motors(motors_prev, motors_next, speed);
+
+    // Update robot LEDs based on the calculated movement state
+    switch (leds_state)
+    {
+    case STRAIGHT: // Robot moving straight
+        robot_LEDs(2, 2); // Green-ish LEDs
+        break;
+    case TURN_L: // Robot turning left
+        robot_LEDs(2, 3); // Green-ish left, Yellow-ish right
+        break;
+    case TURN_R: // Robot turning right
+        robot_LEDs(3, 2); // Yellow-ish left, Green-ish right
+        break;
+    case STOP: // Robot stopped
+        robot_LEDs(1, 1); // Red LEDs
+        break;
+    case LOST: // Robot lost the line
+        robot_LEDs(4, 4); // Blue LEDs
+        break;
+    default:
+        break;
+    }
+
+    // Copy the current motor state to the previous state for the next iteration
+    for (i = 0; i < 4; i++) {
+        motors_prev[i] = motors_next[i];
+    }
+}
+
+uint8_t follow_motors(uint8_t *previous, uint8_t *next, uint8_t speed, uint16_t *max_light, uint16_t *min_light)
+{
+    read_LDRs(&ldr_vals);
+    
+    if ((ldr_vals[0] > (max_light[0] - min_light[0])/2) && (ldr_vals[1] > (max_light[1] - min_light[1])/2))
+    {
+        next[0] = 1; // Enable left motor (direction 1: forward)
+        next[2] = 1; // Enable right motor
+        next[1] = speed; // Set left speed
+        next[3] = speed; // Set right speed
+    }
+    else if ((ldr_vals[0] > (max_light[0] - min_light[0])/2))
+    {
+        next[0] = 1; // Enable left motor (direction 1: forward)
+        next[2] = 1; // Enable right motor
+        next[1] = speed; // Set left speed
+        next[3] = speed*0.5; // Set right speed
+    }
+    else if (ldr_vals[1] > (max_light[1] - min_light[1])/2)
+    {
+        next[0] = 1; // Enable left motor (direction 1: forward)
+        next[2] = 1; // Enable right motor
+        next[1] = speed*0.5; // Set left speed
+        next[3] = speed; // Set right speed
+    }
+    else
+    {
+        next[0] = 1; // Enable left motor (direction 1: forward)
+        next[2] = 1; // Enable right motor
+        next[1] = 0; // Set left speed
+        next[3] = 0; // Set right speed
+    }
+}
+
+void follow_light(uint8_t speed, uint16_t *max_light, uint16_t *min_light)
+{
+    follow_motors(motors_prev, motors_next, speed, max_light, min_light);
+    motors(motors_next[0], motors_next[1], motors_next[2], motors_next[3]);
+
+    // Copy the current motor state to the previous state for the next iteration
+    for (i = 0; i < 4; i++) {
+        motors_prev[i] = motors_next[i];
+    }
+}
+
+uint8_t escape_motors(uint8_t *previous, uint8_t *next, uint8_t speed, uint16_t *max_light, uint16_t *min_light)
+{
+    read_LDRs(ldr_vals);
+    
+    if ((ldr_vals[0] > (max_light[0] - min_light[0])/2) && (ldr_vals[1] > (max_light[1] - min_light[1])/2))
+    {
+        next[0] = 2; // Enable left motor (direction 2: backward)
+        next[2] = 2; // Enable right motor
+        next[1] = speed; // Set left speed
+        next[3] = speed; // Set right speed
+    }
+    else if ((ldr_vals[0] > (max_light[0] - min_light[0])/2))
+    {
+        next[0] = 2; // Enable left motor (direction 2: backward)
+        next[2] = 2; // Enable right motor
+        next[1] = speed; // Set left speed
+        next[3] = speed*0.5; // Set right speed
+    }
+    else if (ldr_vals[1] > (max_light[1] - min_light[1])/2)
+    {
+        next[0] = 2; // Enable left motor (direction 2: backward)
+        next[2] = 2; // Enable right motor
+        next[1] = speed*0.5; // Set left speed
+        next[3] = speed; // Set right speed
+    }
+    else
+    {
+        next[0] = 2; // Enable left motor (direction 2: backward)
+        next[2] = 2; // Enable right motor
+        next[1] = 0; // Set left speed
+        next[3] = 0; // Set right speed
+    }
+}
+
+void escape_light(uint8_t speed, uint16_t *max_light, uint16_t *min_light)
+{
+    escape_motors(motors_prev, motors_next, speed, max_light, min_light);
+    motors(motors_next[0], motors_next[1], motors_next[2], motors_next[3]);
+
+    // Copy the current motor state to the previous state for the next iteration
+    for (i = 0; i < 4; i++) {
+        motors_prev[i] = motors_next[i];
+    }
+}
