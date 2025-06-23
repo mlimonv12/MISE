@@ -15,7 +15,7 @@
 void read_LDRs(uint16_t *LDR_reading)
 {
     // Enable ADC interrupts for LDR pins (specifically ADCIE for ADCMEM0, as only one is used)
-    ADCIE |= (BIT0 | BIT5); // Enable ADC interrupt for A0 and A5 (LDR_PINS)
+    ADCIE |= 0x31; // (BIT0 | BIT5) Enable ADC interrupt for A0 and A5 (LDR_PINS)
 
     // First LDR (connected to A0)
     ADCCTL0 &= ~ADCENC;                 // Disable ADC to configure
@@ -32,6 +32,7 @@ void read_LDRs(uint16_t *LDR_reading)
     LDR_reading[0] = ADC_value; // Store the converted value from A0
 
     // Second LDR (connected to A5)
+    ADCIE |= 0x31;
     ADCCTL0 &= ~ADCENC;                 // Disable ADC to configure
     ADCMCTL0 &= ~ADCINCH_15;            // Clear previous channel selection
     ADCMCTL0 |= ADCINCH_5;              // Select A5 (P1.5) as input channel

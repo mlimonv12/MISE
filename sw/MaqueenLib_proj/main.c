@@ -73,10 +73,11 @@ main(void) {
             switch (currentNavigationMode)
             {
             case 0: // Follow light
-                //follow_light(currentSpeed, )
+                follow_light(currentSpeed, max_light, min_light);
                 break;
             
             case 1: // Escape light
+                escape_light(currentSpeed, max_light, min_light);
                 break;
 
             case 2: // Line track

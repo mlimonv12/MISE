@@ -42,6 +42,6 @@ __interrupt void ADC_ISR(void){
     __bic_SR_register_on_exit(LPM0_bits);
 
     // Clear any pending ADC interrupt flags for the relevant pins (redundant if ADCIE is 0)
-    // ADCIFG &= ~(JS_ADC_PINS | LDR_PINS); // Clear flags for all ADC pins on P1
+    ADCIFG &= ~(JS_ADC_PINS | LDR_PINS); // Clear flags for all ADC pins on P1
 }
 

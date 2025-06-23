@@ -251,14 +251,15 @@ void update_ldr_calibration_display(uint8_t isMaxLight) {
         // Display "Maximum light values:" on the first line
         strncpy(temp_buffer, "Max light values", 16);
         // Display LDR values on the second line
-        sprintf(temp_buffer[16], "%d        %d", (uint16_t)max_light[0], (uint16_t)max_light[1]);
+        sprintf(&temp_buffer[16], "%d        %d", (uint16_t)max_light[0], (uint16_t)max_light[1]);
     } else {
         // Display "Minimum light values:" on the first line
         strncpy(temp_buffer, "Min light values", 16);
         // Display LDR values on the second line
-        sprintf(temp_buffer[16], "%d        %d", (uint16_t)min_light[0], (uint16_t)min_light[1]);
+        sprintf(&temp_buffer[16], "%d        %d", (uint16_t)min_light[0], (uint16_t)min_light[1]);
     }
     
+    __no_operation();
     update_LCD(temp_buffer);
     delay_ms(1500); // Show message for a bit longer
 }
@@ -414,7 +415,7 @@ void execute_menu_action(uint8_t index) {
                     update_menu_display();
                     return;
                 case 2: // Calibrate LDRs
-                    current_menu = CALIBRATE_LDR_MENU;
+                    currentMenu = CALIBRATE_LDR_MENU;
                     current_menu = calibrate_ldrs_menu_items;
                     current_menu_length = LDR_MENU_LENGTH;
                     menuIndex = 0;
@@ -488,7 +489,7 @@ void execute_menu_action(uint8_t index) {
             current_menu_length = LDR_MENU_LENGTH;
             menuIndex = 0;
             topVisibleIndex = 0;
-            update_menu_display();            
+            update_menu_display();
             return;
     }
 

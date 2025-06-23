@@ -13,7 +13,7 @@
 
 // ADC Pins (P1 pins for analog inputs, used by low_level_adc and sensor_reading)
 #define JS_ADC_PINS 0x12  // (BIT1 | BIT4) - P1.1 (A1) and P1.4 (A4) for Joystick analog axes
-#define LDR_PINS    0x21  // (BIT0 | BIT5) - P1.0 (A0) and P1.5 (A5) for LDRs
+#define LDR_PINS    0x31  // (BIT0 | BIT5) - P1.0 (A0) and P1.5 (A5) for LDRs
 
 // LCD Reset pin
 #define LCD_RST_PIN BIT4 // P2.4
