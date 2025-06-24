@@ -5,10 +5,9 @@
 #include "../low_level/uart.h"
 
 // LED IDs for Wi-Fi commands
-#define LED_RGB     0x19
+#define LEDS        0x19
 #define LED_LEFT    0x01
 #define LED_RIGHT   0x02
-#define LED_BOTH    0xFE  // Broadcast ID for both LEDs
 
 // LED Colors for Wi-Fi commands
 #define COLOR_OFF   0x00
@@ -21,11 +20,17 @@
 #define COLOR_WHITE 0x07
 
 // Motor controls
-
+#define MOTORS 0x20
+#define MOTOR_LEFT 1
+#define MOTOR_RIGHT 2
+#define MOTOR_BOTH 3
+#define STOP 0
+#define FRONT 1
+#define BACK 2
 
 extern StrConexion conexion;
-extern RxReturn recepcion;
-extern RecepcionWifi modWifi;
+extern RxReturn wifi_rx;
+extern wifi_info wifi_msg;
 
 // Declare the main Wi-Fi control function
 void wifi_control(void);

@@ -17,14 +17,14 @@ typedef unsigned char byte;
 #define TXD0_READY (UCA0IFG&UCTXIFG)
 #define TXD0_BUSY  (UCA0STATW&UCBUSY)
 
-typedef struct RecepcionWifi
+typedef struct wifi_info
 {
     uint8_t id;                  // Identificador: 1 = Izquierda, 2 = Derecha, 0xFE = todos (Broadcast)
-    uint8_t length;              // Longitud de bytes del paquete (num de parametros + 2)
-    uint8_t instruction;         // Instruccion: 2 = READ, 3 = WRITE (From comment, actual values are 0x19, 0x20)
-    uint8_t parametre[5];        // Instrucciones y/o parametros para comunicar
-    uint8_t check_sum;           // Parametro para detectar posibles errores de comunicacion
-}RecepcionWifi;
+    uint8_t len;              // Longitud de bytes del paquete (num de parametros + 2)
+    uint8_t instr;         // Instruccion: 2 = READ, 3 = WRITE (From comment, actual values are 0x19, 0x20)
+    uint8_t param[5];        // Instrucciones y/o parametros para comunicar
+    uint8_t chasum;           // Parametro para detectar posibles errores de comunicacion
+} wifi_info;
 
 //Estructura de datos de respuesta a una recepci�n.
 typedef struct RxReturn

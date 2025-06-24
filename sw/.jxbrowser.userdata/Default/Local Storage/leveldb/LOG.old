@@ -1,2 +1,3 @@
-2025/06/21-18:32:48.766 3ba4 Creating DB C:\Users\HP\kDrive\University\10e\MISE\projecte\sw\.jxbrowser.userdata\Default\Local Storage\leveldb since it was missing.
-2025/06/21-18:32:48.778 3ba4 Reusing MANIFEST C:\Users\HP\kDrive\University\10e\MISE\projecte\sw\.jxbrowser.userdata\Default\Local Storage\leveldb/MANIFEST-000001
+2025/06/21-18:35:52.366 2c68 Reusing MANIFEST C:\Users\HP\kDrive\University\10e\MISE\projecte\sw\.jxbrowser.userdata\Default\Local Storage\leveldb/MANIFEST-000001
+2025/06/21-18:35:52.367 2c68 Recovering log #3
+2025/06/21-18:35:52.368 2c68 Reusing old log C:\Users\HP\kDrive\University\10e\MISE\projecte\sw\.jxbrowser.userdata\Default\Local Storage\leveldb/000003.log 

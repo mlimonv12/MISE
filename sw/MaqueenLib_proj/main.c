@@ -64,7 +64,7 @@ main(void) {
     while(1){
         // Handle menu interactions (joystick presses)
         handle_menu();
-        delay_ms(100); // Small delay for overall loop cycle
+        //delay_ms(100); // Small delay for overall loop cycle
         __no_operation(); // Placeholder for breakpoint during debugging
 
         // If in "Start" (navigation) mode, execute line-following logic
@@ -91,6 +91,7 @@ main(void) {
                     wifi_init();
                 }
                 wifi_control();
+                robot_LEDs(currentLeftLedColor, currentRightLedColor);
                 break;
 
             case 4: // Joystick control
@@ -103,6 +104,7 @@ main(void) {
         }
         else
         {
+            wifi_started = 0;
             motors(0,0,0,0); // Stop motors if out of navigation mode
         }
         
