@@ -10,6 +10,7 @@
 "./lib/top_level/robot_control.obj"
 "./lib/top_level/robot_menu.obj"
 "./lib/top_level/sensor_reading.obj"
+"./lib/top_level/wifi.obj"
 "../lnk_msp430fr2355.cmd"
 -lfrwp_init.a
 -llibc.a

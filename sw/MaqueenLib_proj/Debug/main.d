@@ -33,6 +33,7 @@ main.obj: ../lib/top_level/lcd_control.h
 main.obj: ../lib/top_level/robot_control.h
 main.obj: ../lib/top_level/sensor_reading.h
 main.obj: ../lib/top_level/robot_menu.h
+main.obj: ../lib/top_level/wifi.h
 
 ../main.c:
 
@@ -99,4 +100,6 @@ C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/xlocale/_strin
 ../lib/top_level/sensor_reading.h:
 
 ../lib/top_level/robot_menu.h:
+
+../lib/top_level/wifi.h:
 

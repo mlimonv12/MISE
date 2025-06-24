@@ -160,10 +160,10 @@ uint8_t linetrack_motors(uint8_t *previous, uint8_t *next, uint8_t speed)
         // Robot is off the line or in an unhandled state, stop or perform recovery.
         // Original code had both speeds at 35, then direction 1 (forward).
         // This implies a slow forward search or stop.
-        next[1] = speed*0.7; // Set left speed to low value
-        next[3] = speed*0.7; // Set right speed to low value
         next[0] = 1; // Set left motor direction to forward
         next[2] = 1; // Set right motor direction to forward
+        next[1] = speed*0.7; // Set left speed to low value
+        next[3] = speed*0.7; // Set right speed to low value
 
         return LOST; // Return LOST state
     }
@@ -178,6 +178,7 @@ uint8_t linetrack_motors(uint8_t *previous, uint8_t *next, uint8_t speed)
 void linetrack(uint8_t speed)
 {
     leds_state = linetrack_motors(motors_prev, motors_next, speed);
+    motors(motors_next[0], motors_next[1], motors_next[2], motors_next[3]);
 
     // Update robot LEDs based on the calculated movement state
     switch (leds_state)
@@ -211,31 +212,31 @@ uint8_t follow_motors(uint8_t *previous, uint8_t *next, uint8_t speed, uint16_t 
 {
     read_LDRs(&ldr_vals);
     
-    if ((ldr_vals[0] > (max_light[0] - min_light[0])/2) && (ldr_vals[1] > (max_light[1] - min_light[1])/2))
+    if ((ldr_vals[0] > (max_light[0] - min_light[0]) *0.8) && (ldr_vals[1] > (max_light[1] - min_light[1]) *0.8))
     {
-        next[0] = 1; // Enable left motor (direction 1: forward)
-        next[2] = 1; // Enable right motor
+        next[0] = 2; // Enable left motor (direction 1: forward)
+        next[2] = 2; // Enable right motor
         next[1] = speed; // Set left speed
         next[3] = speed; // Set right speed
     }
-    else if ((ldr_vals[0] > (max_light[0] - min_light[0])/2))
+    else if ((ldr_vals[1] > (max_light[1] - min_light[1])*0.8))
     {
-        next[0] = 1; // Enable left motor (direction 1: forward)
-        next[2] = 1; // Enable right motor
+        next[0] = 2; // Enable left motor (direction 1: forward)
+        next[2] = 2; // Enable right motor
         next[1] = speed; // Set left speed
-        next[3] = speed*0.5; // Set right speed
+        next[3] = speed*0.2; // Set right speed
     }
-    else if (ldr_vals[1] > (max_light[1] - min_light[1])/2)
+    else if (ldr_vals[0] > (max_light[0] - min_light[0]) *0.8)
     {
-        next[0] = 1; // Enable left motor (direction 1: forward)
-        next[2] = 1; // Enable right motor
-        next[1] = speed*0.5; // Set left speed
+        next[0] = 2; // Enable left motor (direction 1: forward)
+        next[2] = 2; // Enable right motor
+        next[1] = speed*0.2; // Set left speed
         next[3] = speed; // Set right speed
     }
     else
     {
-        next[0] = 1; // Enable left motor (direction 1: forward)
-        next[2] = 1; // Enable right motor
+        next[0] = 2; // Enable left motor (direction 1: forward)
+        next[2] = 2; // Enable right motor
         next[1] = 0; // Set left speed
         next[3] = 0; // Set right speed
     }
@@ -256,31 +257,31 @@ uint8_t escape_motors(uint8_t *previous, uint8_t *next, uint8_t speed, uint16_t 
 {
     read_LDRs(ldr_vals);
     
-    if ((ldr_vals[0] > (max_light[0] - min_light[0])/2) && (ldr_vals[1] > (max_light[1] - min_light[1])/2))
+    if ((ldr_vals[0] > (max_light[0] - min_light[0]) *0.8) && (ldr_vals[1] > (max_light[1] - min_light[1]) *0.8))
     {
-        next[0] = 2; // Enable left motor (direction 2: backward)
-        next[2] = 2; // Enable right motor
+        next[0] = 1; // Enable left motor (direction 2: backward)
+        next[2] = 1; // Enable right motor
         next[1] = speed; // Set left speed
         next[3] = speed; // Set right speed
     }
-    else if ((ldr_vals[0] > (max_light[0] - min_light[0])/2))
+    else if ((ldr_vals[1] > (max_light[1] - min_light[1]) *0.8))
     {
-        next[0] = 2; // Enable left motor (direction 2: backward)
-        next[2] = 2; // Enable right motor
+        next[0] = 1; // Enable left motor (direction 2: backward)
+        next[2] = 1; // Enable right motor
         next[1] = speed; // Set left speed
-        next[3] = speed*0.5; // Set right speed
+        next[3] = speed*0.2; // Set right speed
     }
-    else if (ldr_vals[1] > (max_light[1] - min_light[1])/2)
+    else if (ldr_vals[0] > (max_light[0] - min_light[0]) *0.8)
     {
-        next[0] = 2; // Enable left motor (direction 2: backward)
-        next[2] = 2; // Enable right motor
-        next[1] = speed*0.5; // Set left speed
+        next[0] = 1; // Enable left motor (direction 2: backward)
+        next[2] = 1; // Enable right motor
+        next[1] = speed*0.2; // Set left speed
         next[3] = speed; // Set right speed
     }
     else
     {
-        next[0] = 2; // Enable left motor (direction 2: backward)
-        next[2] = 2; // Enable right motor
+        next[0] = 1; // Enable left motor (direction 2: backward)
+        next[2] = 1; // Enable right motor
         next[1] = 0; // Set left speed
         next[3] = 0; // Set right speed
     }

@@ -9,6 +9,13 @@
 #define AT_H_
 
 #include <stdint.h>
+#include "../top_level/robot_menu.h"
+typedef struct Conexion {
+    uint8_t IP[16]; //4x3 digitos de IP + 3 puntos + \0 = 16 caracteres
+    uint8_t conectado; //1: conectado, 0: no conectado
+    uint8_t tipo;   //0: UDP, 1: TCP
+    uint8_t conID; //'0'...'9' //El identificador de conexion, lo limitaremos a 1 caracter "0"..."9" = 0x30...0x39. Otro valor si no hay conexion activa
+}StrConexion;
 
 /*
  * Esta libreria necesita otra libreria con las funciones especificas de la UART (p. ej "uart_wifi.h"),
@@ -52,8 +59,12 @@
 //1- Si actuamos como cliente ("STA", estacion) de una Wifi existente:
 //#define SSID_STA "Nombre_del_AP" //El SSID del AP al que queremos conectarnos cuando somos cliente (STA)
 //#define PWD_STA "Contrasenya_del_AP"
-#define SSID_STA "N12L" //El SSID del AP al que queremos conectarnos cuando somos cliente (STA)
-#define PWD_STA "d1g1t4l!"
+
+#define SSID_STA ssid_sta //El SSID del AP al que queremos conectarnos cuando somos cliente (STA)
+#define PWD_STA pwd_sta
+
+//#define SSID_STA "N12L" //El SSID del AP al que queremos conectarnos cuando somos cliente (STA)
+//#define PWD_STA "d1g1t4l!"
 
 
 //2- Si actuamos como servidor de una Wifi ("AP", punto de acceso):

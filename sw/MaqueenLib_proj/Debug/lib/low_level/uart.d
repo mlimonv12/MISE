@@ -18,6 +18,7 @@ lib/low_level/uart.obj: C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LT
 lib/low_level/uart.obj: C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/machine/_stdint.h
 lib/low_level/uart.obj: C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/_stdint.h
 lib/low_level/uart.obj: ../lib/low_level/uart.h
+lib/low_level/uart.obj: ../lib/low_level/timers.h
 
 ../lib/low_level/uart.c:
 
@@ -54,4 +55,6 @@ C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/machine/_stdin
 C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/_stdint.h:
 
 ../lib/low_level/uart.h:
+
+../lib/low_level/timers.h:
 

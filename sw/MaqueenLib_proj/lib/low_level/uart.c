@@ -7,6 +7,7 @@
 #include <msp430.h>
 #include <stdint.h>
 #include "uart.h"
+#include "timers.h"
 
 uint8_t DatoLeido_UART, Byte_Recibido;
 
@@ -39,15 +40,20 @@ void init_uart_wifi(void) //UART configuration: UCA0, 115200bps
 volatile uint32_t timer_ticks = 0;
 
 // Function to initialize Timer A0 for timeout
-void Activa_Timer_Timeout(void) {
+void init_timeout(void) {
     TB1CTL |= (TBCLR | TBSSEL__SMCLK | MC__UP); // CLEAR+SMCLK+UPMODE
     TB1CCR0 = 16000;           // 16 MHz / 16000 = 100 kHz (1ms period)
     TB1CCTL0 |= CCIE;          // Enable interrupt
     timer_ticks = 0;
 }
 
+void stop_timeout(void){
+    TB1CTL ^= MC__UP;   // Deactivate timeout
+    TB1CTL |= TBCLR;    // Clean timer
+}
+
 // Function to reset the timer count
-void Reset_Timeout(void) {
+void reset_timeout(void) {
     timer_ticks = 0;
 }
 
@@ -70,11 +76,14 @@ RxReturn RxPacket(uint32_t time_out) {
     uint16_t bCount;
     uint8_t Rx_time_out = 0;
 
-    Activa_Timer_Timeout(); // Start the timer
+    respuesta.time_out = 0;
+    respuesta.num_bytes = 0;
+
+    init_timeout(); // Start the timer
 
     for (bCount = 0; bCount < RX_BUFFER_SIZE; bCount++) {
-        Reset_Timeout();   // Reset the timer
-        Byte_Recibido = 0; // Assuming 0 represents "No"
+        reset_timeout();   // Reset the timer
+        Byte_Recibido = 0;
 
         while (!Byte_Recibido) { // While no byte received
             Rx_time_out = TimeOut(time_out); // Check for timeout
@@ -92,6 +101,7 @@ RxReturn RxPacket(uint32_t time_out) {
     respuesta.time_out = Rx_time_out; // Store timeout status
     respuesta.num_bytes = bCount;     // Store number of bytes received
 
+    stop_timeout();
     return respuesta;
 }
 
@@ -106,7 +116,7 @@ uint8_t TxPacket(uint8_t bParameterLength, const uint8_t *buffer) {
     bytesSent = 0;
     _NOP();
     while (bytesSent < bParameterLength) {
-        //while (!TXD0_READY); // Wait for TX buffer to be ready
+        while (!TXD0_READY); // Wait for TX buffer to be ready
         UCA0TXBUF = buffer[bytesSent++];
         _NOP();
     }
@@ -127,9 +137,9 @@ __interrupt void timerB1_0_isr(void)
 #pragma vector = EUSCI_A0_VECTOR
 __interrupt void EUSCIA0_IRQHandler(void) {
     switch (__even_in_range(UCA0IV, 4)) {
-        case 0:
-            break; // No interrupt
-        case 2:    // RX interrupt
+        case USCI_NONE: break;       // No interrupt
+        case USCI_UART_UCRXIFG:      // RX interrupt
+            UCA0IFG &= ~UCRXIFG;       // Clear interrupt
             UCA0IE &= ~UCRXIE; // Disable RX interrupt
             DatoLeido_UART = UCA0RXBUF;
             Byte_Recibido = 1; // Signal byte received

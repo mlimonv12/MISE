@@ -41,5 +41,7 @@ void LCD_write_char(char c);
  */
 void display_LCD(char *msg);
 
+void update_LCD(char *msg);
+
 #endif /* LCD_CONTROL_H_ */
 

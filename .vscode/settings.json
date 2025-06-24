@@ -4,6 +4,11 @@
         "i2c.h": "c",
         "at.h": "c",
         "recursos.h": "c",
-        "uart.h": "c"
+        "uart.h": "c",
+        "timers.h": "c",
+        "robot_menu.h": "c",
+        "uart_alumnos.h": "c",
+        "adc.h": "c",
+        "*.bak": "c"
     }
 }

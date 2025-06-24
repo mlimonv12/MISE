@@ -1,0 +1,13 @@
+"./AT.obj"
+"./adc.obj"
+"./gpios.obj"
+"./i2c.obj"
+"./lcd.obj"
+"./main.obj"
+"./robotcommands.obj"
+"./timers.obj"
+"./uart_alumnos.obj"
+"./ultrasounds.obj"
+"../lnk_msp430fr2355.cmd"
+-lfrwp_init.a
+-llibc.a

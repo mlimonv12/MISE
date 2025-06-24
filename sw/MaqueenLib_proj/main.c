@@ -17,7 +17,8 @@
 #include "./lib/top_level/lcd_control.h"
 #include "./lib/top_level/robot_control.h"
 #include "./lib/top_level/sensor_reading.h"
-#include "./lib/top_level/robot_menu.h" // NEW: Include the menu system
+#include "./lib/top_level/robot_menu.h"
+#include "./lib/top_level/wifi.h"
 
 // Variables
 //uint8_t i = 0;
@@ -85,20 +86,22 @@ main(void) {
                 break;
 
             case 3: // Wi-fi control
+                wifi_control();
                 break;
 
             case 4: // Joystick control
                 break;
 
             default:
+                motors(0,0,0,0); // Stop motors if out of navigation mode
                 break;
             }
-            // Calculate the next motor commands based on photodetector readings
-            //leds_state = calculate_motors(stat_prev, stat_next);
-            // Read Light Dependent Resistors (LDRs)
-            read_LDRs(LDR_reading); // Store LDR values into LDR_reading array
-
         }
+        else
+        {
+            motors(0,0,0,0); // Stop motors if out of navigation mode
+        }
+        
     }
 }
 

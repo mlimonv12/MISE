@@ -15,13 +15,6 @@
 #include "AT.h"
 #include LIBUART_AT //#include "uart_wifi.h"
 
-typedef struct Conexion {
-    uint8_t IP[16]; //4x3 digitos de IP + 3 puntos + \0 = 16 caracteres
-    uint8_t conectado; //1: conectado, 0: no conectado
-    uint8_t tipo;   //0: UDP, 1: TCP
-    uint8_t conID; //'0'...'9' //El identificador de conexion, lo limitaremos a 1 caracter "0"..."9" = 0x30...0x39. Otro valor si no hay conexion activa
-}StrConexion;
-
 uint8_t WiFi_Mode = AP_MODE; //Modo 1: Station, 2: AP, 3: AP + Station
 uint8_t SSID_actual[32]; //El SSID del AP al que estamos conectado.
 
@@ -233,7 +226,7 @@ uint8_t getIP(uint8_t max_car, uint8_t *cadena){
     uint8_t talla;
     respuesta = pedir_mi_IP();
     talla = pinta_IP(max_car, respuesta.StatusPacket, cadena);
-    return talla; //devolvemos el numero de carecteres guardados
+    return talla; //devolvemos el numero de caracteres guardados
 }
 
 /*

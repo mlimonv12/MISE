@@ -11,6 +11,7 @@
 #define LED_COLORS_MENU     4
 #define SINGLE_LED_COLOR_MENU 5
 #define CALIBRATE_LDR_MENU 6
+#define SELECT_NETWORK 7
 
 // Global variables for menu state (declared extern)
 extern uint8_t currentMenu;
@@ -44,6 +45,10 @@ extern uint16_t min_light [2];
 extern uint8_t currentRightLedColor;
 extern uint8_t currentLeftLedColor;
 extern uint8_t settingRightLed;
+
+// Wi-Fi
+extern char ssid_sta [];
+extern char pwd_sta [];
 
 // Menu item definitions (declared extern)
 extern const char* main_menu_items[];

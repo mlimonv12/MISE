@@ -10,6 +10,22 @@
 
 #define RX_BUFFER_SIZE 512 // buffer UART. Ojo: puede superar los 255 caracteres
 
+#define RX_BUFFER_SIZE 512 // buffer UART. Ojo: puede superar los 255 caracteres
+
+#define Baud_rate 115200                        // symbols per second, 1 Symbol = 1 bit so UART transfer speed: 115,2kb/s
+typedef unsigned char byte;
+#define TXD0_READY (UCA0IFG&UCTXIFG)
+#define TXD0_BUSY  (UCA0STATW&UCBUSY)
+
+typedef struct RecepcionWifi
+{
+    uint8_t id;                  // Identificador: 1 = Izquierda, 2 = Derecha, 0xFE = todos (Broadcast)
+    uint8_t length;              // Longitud de bytes del paquete (num de parametros + 2)
+    uint8_t instruction;         // Instruccion: 2 = READ, 3 = WRITE (From comment, actual values are 0x19, 0x20)
+    uint8_t parametre[5];        // Instrucciones y/o parametros para comunicar
+    uint8_t check_sum;           // Parametro para detectar posibles errores de comunicacion
+}RecepcionWifi;
+
 //Estructura de datos de respuesta a una recepci�n.
 typedef struct RxReturn
 {
