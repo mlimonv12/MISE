@@ -57,7 +57,7 @@ void wifi_control(void) {
     if (wifi_rx.num_bytes > 0) { // Check if any data was successfully received
         // Periodically check the Wi-Fi client connection state
         error_rx = getConState(); // This function (from AT.c) updates conexion.conectado
-        if (error_rx) {
+        if (!error_rx) {
             clear_LCD();
             update_LCD("Conn. State Err"); // Display an error if connection state check fails
         } else {

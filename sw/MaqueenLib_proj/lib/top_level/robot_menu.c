@@ -214,7 +214,9 @@ void display_navigation_info(void) {
         // For other modes, clear the second line or display a generic message
         memset(&temp_buffer[16], ' ', 16); // Fill with spaces
     }
-    update_LCD(temp_buffer);
+
+    if (currentNavigationMode != 3) // Don't want updates on Wifi mode
+        update_LCD(temp_buffer);
 }
 
 /**
