@@ -74,7 +74,7 @@ const char*  mode_names[] = {
     "Line Follow     ",
     "Wi-Fi Control   "
 };
-#define MODE_MENU_LENGTH (sizeof( mode_names) / sizeof( mode_names[0]))
+#define MODE_MENU_LENGTH 4
 
 const char* settings_menu_items[] = {
     "Speed          ",

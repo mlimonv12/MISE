@@ -59,7 +59,7 @@ void wifi_control(void) {
         error_rx = getConState(); // This function (from AT.c) updates conexion.conectado
         if (!error_rx) {
             clear_LCD();
-            update_LCD("Conn. State Err"); // Display an error if connection state check fails
+            update_LCD("Disconnected"); // Display an error if connection state check fails
         } else {
             // If a client is connected, display confirmation or clear previous "No client" message
             clear_LCD();
@@ -100,15 +100,15 @@ void wifi_control(void) {
                 switch (wifi_msg.id)
                 {
                     case MOTOR_LEFT:
-                        motors(wifi_msg.param[2], wifi_msg.param[3], 0, 0);
+                        motors(wifi_msg.param[2], wifi_msg.param[1], 0, 0);
                         break;
                     
                     case MOTOR_RIGHT:
-                        motors(0, 0, wifi_msg.param[2], wifi_msg.param[3]);
+                        motors(0, 0, wifi_msg.param[2], wifi_msg.param[1]);
                         break;
 
                     default: // Both motors
-                        motors(wifi_msg.param[2], wifi_msg.param[3], wifi_msg.param[2], wifi_msg.param[3]);
+                        motors(wifi_msg.param[2], wifi_msg.param[1], wifi_msg.param[2], wifi_msg.param[1]);
                         break;
                 }
 
