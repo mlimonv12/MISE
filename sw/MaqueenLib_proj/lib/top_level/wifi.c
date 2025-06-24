@@ -15,7 +15,7 @@
 RxReturn recepcion;
 RecepcionWifi modWifi;
 
-void wifi_control(void) {
+void wifi_init(void) {
     uint8_t Error_recibido = 0;
     char ip_display_buffer[32]; // Buffer to hold IP address string for LCD
 
@@ -39,9 +39,13 @@ void wifi_control(void) {
     // Format the IP address string for display on the LCD
     snprintf(ip_display_buffer, sizeof(ip_display_buffer), "Listening on:   %s", conexion.IP);
     update_LCD(ip_display_buffer);
-    delay_ms(1000); // Display IP for 1 second
+    delay_ms(2000); // Display IP for 2 seconds
+}
 
-    // 4. Main loop for Wi-Fi communication and command processing
+void wifi_control(void) {
+    uint8_t Error_recibido = 0;
+
+    // Main routine for Wi-Fi communication and command processing
     // Stay in this loop as long as the current navigation mode is set to Wi-Fi control (mode 3)
     // Attempt to receive data from the Wi-Fi module
     recepcion = recibir_wifi(); // This function (from AT.c) calls RxAT to get data
@@ -111,7 +115,11 @@ void wifi_control(void) {
                 break;
         }
     }
+    else
+    {
+        update_LCD("Waiting for connection");
+    }
     // When exiting Wi-Fi control mode, ensure motors are stopped and LEDs are turned off or set to a default state
     motors(0, 0, 0, 0);
-    robot_LEDs(LED_BOTH, COLOR_OFF);
+    //robot_LEDs(LED_BOTH, COLOR_OFF);
 }

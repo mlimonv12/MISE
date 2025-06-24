@@ -23,6 +23,7 @@ lib/low_level/AT.obj: C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/
 lib/low_level/AT.obj: C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/xlocale/_string.h
 lib/low_level/AT.obj: C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/stdlib.h
 lib/low_level/AT.obj: ../lib/low_level/AT.h
+lib/low_level/AT.obj: ../lib/top_level/robot_menu.h
 lib/low_level/AT.obj: ../lib/low_level/uart.h
 
 ../lib/low_level/AT.c:
@@ -70,6 +71,8 @@ C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/xlocale/_strin
 C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/stdlib.h:
 
 ../lib/low_level/AT.h:
+
+../lib/top_level/robot_menu.h:
 
 ../lib/low_level/uart.h:
 

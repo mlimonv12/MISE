@@ -17,6 +17,7 @@ uint8_t topVisibleIndex = 0;
 // Robot state variables (defined here, matches extern in .h)
 uint8_t robotRunning = 0;
 uint8_t ledsOn = 0;
+uint8_t wifi_started = 0;
 
 char ssid_sta [] = "BRCO";
 char pwd_sta [] = "SJT7b&$Te8BQFfvq5b";
@@ -302,7 +303,16 @@ void update_ldr_calibration_display(uint8_t isMaxLight) {
         sprintf(&temp_buffer[16], "%d        %d", (uint16_t)min_light[0], (uint16_t)min_light[1]);
     }
 
-    __no_operation(); // This intrinsic is often used as a placeholder for a no-op instruction, might be compiler/platform specific.
+    update_LCD(temp_buffer);
+    delay_ms(1500); // Show message for a bit longer
+}
+
+void update_network_display(void) {
+    char temp_buffer[33];
+    memset(temp_buffer, ' ', sizeof(temp_buffer) - 1);
+    temp_buffer[32] = '\0';
+
+    sprintf(temp_buffer, "Will connect to:%s", ssid_sta);
     update_LCD(temp_buffer);
     delay_ms(1500); // Show message for a bit longer
 }
@@ -365,6 +375,11 @@ void toggle_all_leds(void) {
     delay_ms(1000);
 }
 
+void select_network(uint8_t index) {
+    strcpy(ssid_sta, ssid_list[index]);
+    strcpy(pwd_sta, pwd_list[index]);
+}
+
 /**
  * @brief Handles going back in the menu hierarchy.
  */
@@ -393,6 +408,7 @@ void go_back_in_menu(void) {
             current_menu_length = SETTINGS_MENU_LENGTH;
             break;
         case SELECT_NETWORK:
+            wifi_started = 0;
             currentMenu = SETTINGS_MENU;
             current_menu = settings_menu_items;
             current_menu_length = SETTINGS_MENU_LENGTH;
@@ -552,6 +568,16 @@ void execute_menu_action(uint8_t index) {
             topVisibleIndex = 0;
             update_menu_display();
             return;
+
+        case SELECT_NETWORK:
+            select_network(index);
+            update_network_display();
+            currentMenu = MAIN_MENU;
+            current_menu = main_menu_items;
+            current_menu_length = MAIN_MENU_LENGTH;
+            menuIndex = 0;
+            topVisibleIndex = 0;
+            update_menu_display();
     }
 
     delay_ms(1000); // Only execute this if an action didn't already return

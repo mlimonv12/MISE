@@ -21,6 +21,7 @@ extern uint8_t topVisibleIndex;
 // Robot state variables
 extern uint8_t robotRunning;
 extern uint8_t ledsOn;
+extern uint8_t wifi_started;
 
 // Mode setting
 #define NUM_MODES           5

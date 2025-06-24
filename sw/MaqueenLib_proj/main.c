@@ -21,7 +21,7 @@
 #include "./lib/top_level/wifi.h"
 
 // Variables
-//uint8_t i = 0;
+
 
 /**
  * main.c - Main application entry point
@@ -86,6 +86,10 @@ main(void) {
                 break;
 
             case 3: // Wi-fi control
+                if (!wifi_started) {
+                    wifi_started = 1;
+                    wifi_init();
+                }
                 wifi_control();
                 break;
 
