@@ -10,12 +10,12 @@
 #include "../low_level/gpio.h"    // For joystick button pressed flags
 
 // Menu state global variables (defined here, matches extern in .h)
-uint8_t currentMenu = MAIN_MENU;
+uint8_t visibleMenu = MAIN_MENU;
 uint8_t menuIndex = 0;
 uint8_t topIndex = 0;
 
 // Robot state variables (defined here, matches extern in .h)
-uint8_t robotRunning = 0;
+uint8_t inMovement = 0;
 uint8_t ledsOn = 0;
 uint8_t wifi_started = 0;
 
@@ -23,18 +23,18 @@ char ssid_sta [] = "BRCO";
 char pwd_sta [] = "SJT7b&$Te8BQFfvq5b";
 
 // Mode setting (defined here, matches extern in .h)
-uint8_t currentNavigationMode = 0;
-uint8_t navigationMode = 0; // This flag indicates if the robot is in an active navigation state
+uint8_t mode = 0; 
+uint8_t active = 0; // This flag indicates if the robot is in an active navigation state
 
 // Speed settings (defined here, matches extern in .h)
 const char* speed_names[NUM_SPEEDS] = {"Slow", "Medium", "Fast", "Kuchauuu"};
 const uint8_t speed_values[NUM_SPEEDS] = {70, 170, 255, 10}; // Example values
-uint8_t currentSpeedIndex = 0;
-uint8_t currentSpeed = 70;
+uint8_t speed_i = 0;
+uint8_t speed = 70;
 
 // LEDs
-uint8_t currentRightLedColor = 0;
-uint8_t currentLeftLedColor = 0;
+uint8_t ledColor_right = 0;
+uint8_t ledColor_left = 0;
 uint8_t settingRightLed = 0;
 
 // LDR calibration readings
@@ -131,14 +131,14 @@ uint8_t current_menu_length = MAIN_MENU_LENGTH;
  * @brief Initializes the menu system, setting the initial menu and displaying it.
  */
 void init_menu(void) {
-    currentMenu = MAIN_MENU;
+    visibleMenu = MAIN_MENU;
     menuIndex = 0;
     topIndex = 0;
     menuContent = main_menu_items;
     current_menu_length = MAIN_MENU_LENGTH;
-    navigationMode = 0; // Ensure navigation mode is off when initializing menu
+    active = 0; // Ensure navigation mode is off when initializing menu
     ldr_display_counter = 0; // Reset counter
-    update_menu_display();
+    menu_update();
 }
 
 /**
@@ -146,7 +146,7 @@ void init_menu(void) {
  * Shows two visible items and a '>' cursor for the selected item.
  * This version constructs a single string for update_LCD.
  */
-void update_menu_display(void) {
+void menu_update(void) {
     char display_buffer[33]; // 16 chars for line 1 + 16 chars for line 2 + null terminator
     memset(display_buffer, ' ', sizeof(display_buffer) - 1); // Fill with spaces
     display_buffer[32] = '\0'; // Null-terminate the entire buffer
@@ -210,16 +210,16 @@ void update_menu_display(void) {
 /**
  * @brief Displays the current navigation info (mode, and LDR values if applicable).
  */
-void display_navigation_info(void) {
+void navigation_info_display(void) {
     char temp_buffer[33];
     memset(temp_buffer, ' ', sizeof(temp_buffer) - 1);
     temp_buffer[32] = '\0';
 
     // Line 1: Show current navigation mode
-    strncpy(temp_buffer, mode_names[currentNavigationMode], 16);
+    strncpy(temp_buffer, mode_names[mode], 16);
 
     // Line 2: Show LDR values for specific modes
-    if (currentNavigationMode == 0 || currentNavigationMode == 1) { // Follow Light or Escape Light
+    if (mode == 0 || mode == 1) { // Follow Light or Escape Light
         read_LDRs(ldr_vals); // Read current LDR values
         sprintf(&temp_buffer[16], "%d        %d", (uint16_t)ldr_vals[1], (uint16_t)ldr_vals[0]);
     } else {
@@ -227,16 +227,16 @@ void display_navigation_info(void) {
         memset(&temp_buffer[16], ' ', 16); // Fill with spaces
     }
 
-    if (currentNavigationMode != 3) // Don't want updates on Wifi mode
+    if (mode != 3) // Don't want updates on Wifi mode
         update_LCD(temp_buffer);
 }
 
 /**
  * @brief Updates the LCD display with the current robot's running state.
  */
-void update_robot_state_display(void) {
+void status_display(void) {
     char temp_buffer[33]; // Buffer for combined lines (16 + 16 + null)
-    snprintf(temp_buffer, sizeof(temp_buffer), "Robot is        %s", robotRunning ? "RUNNING!" : "STOPPED.");
+    snprintf(temp_buffer, sizeof(temp_buffer), "Robot is        %s", inMovement ? "RUNNING!" : "STOPPED.");
     update_LCD(temp_buffer);
     delay_ms(1000);
 }
@@ -244,9 +244,9 @@ void update_robot_state_display(void) {
 /**
  * @brief Updates the LCD display with the currently selected navigation mode.
  */
-void update_mode_display(void) {
+void mode_display(void) {
     char temp_buffer[33];
-    snprintf(temp_buffer, sizeof(temp_buffer), "Mode set to     %s", mode_names[currentNavigationMode]);
+    snprintf(temp_buffer, sizeof(temp_buffer), "Mode set to     %s", mode_names[mode]);
     update_LCD(temp_buffer);
     delay_ms(1000);
 }
@@ -254,9 +254,9 @@ void update_mode_display(void) {
 /**
  * @brief Updates the LCD display with the currently selected speed.
  */
-void update_speed_display(void) {
+void speed_display(void) {
     char temp_buffer[33];
-    snprintf(temp_buffer, sizeof(temp_buffer), "Speed set to    %s", speed_names[currentSpeedIndex]);
+    snprintf(temp_buffer, sizeof(temp_buffer), "Speed set to    %s", speed_names[speed_i]);
     update_LCD(temp_buffer);
     delay_ms(1000);
 }
@@ -265,12 +265,12 @@ void update_speed_display(void) {
  * @brief Updates the LCD display to show the currently selected LED color for a single LED.
  * @param isRightLed Flag to indicate if it's the Right (1) or Left (0) LED.
  */
-void update_single_led_display(uint8_t isRightLed) {
+void single_led_display(uint8_t isRightLed) {
     char temp_buffer[33]; // 16 chars for line 1 + 16 chars for line 2 + null terminator
     memset(temp_buffer, ' ', sizeof(temp_buffer) - 1); // Fill with spaces initially
     temp_buffer[32] = '\0'; // Null-terminate the entire buffer
 
-    sprintf(temp_buffer, "%s      %s", isRightLed ? "Right LED:" : "Left LED: ", color_Names[isRightLed ? currentRightLedColor : currentLeftLedColor]);
+    sprintf(temp_buffer, "%s      %s", isRightLed ? "Right LED:" : "Left LED: ", color_Names[isRightLed ? ledColor_right : ledColor_left]);
 
     update_LCD(temp_buffer);
     delay_ms(1000);
@@ -280,7 +280,7 @@ void update_single_led_display(uint8_t isRightLed) {
  * @brief Displays a calibration message and the current LDR readings.
  * @param isMaxLight Flag indicating if it was a max light (1) or min light (0) calibration.
  */
-void update_ldr_calibration_display(uint8_t isMaxLight) {
+void ldr_calibration_display(uint8_t isMaxLight) {
     char temp_buffer[33];
     memset(temp_buffer, ' ', sizeof(temp_buffer) - 1);
     temp_buffer[32] = '\0';
@@ -302,7 +302,7 @@ void update_ldr_calibration_display(uint8_t isMaxLight) {
 }
 
 
-void update_about_display(uint8_t index) {
+void about_display(uint8_t index) {
     char temp_buffer[33];
     memset(temp_buffer, ' ', sizeof(temp_buffer) - 1);
     temp_buffer[32] = '\0';
@@ -316,7 +316,7 @@ void update_about_display(uint8_t index) {
     delay_ms(3000); // Show message for a bit longer
 }
 
-void update_network_display(void) {
+void network_display(void) {
     char temp_buffer[33];
     memset(temp_buffer, ' ', sizeof(temp_buffer) - 1);
     temp_buffer[32] = '\0';
@@ -328,11 +328,11 @@ void update_network_display(void) {
 
 /**
  * @brief Sets the robot's operating speed.
- * @param speed_id The index of the selected speed.
+ * @param speed_index The index of the selected speed.
  */
-void set_robot_speed(uint8_t speed_id) {
-    currentSpeedIndex = speed_id;
-    currentSpeed = speed_values[speed_id];
+void set_robot_speed(uint8_t speed_index) {
+    speed_i = speed_index;
+    speed = speed_values[speed_index];
 }
 
 /**
@@ -360,9 +360,9 @@ void calibrate_LDR(uint8_t isMaxLight)
  */
 void set_single_led_color(uint8_t isRightLed, uint8_t color_id) {
     if (isRightLed) {
-        currentRightLedColor = color_id;
+        ledColor_right = color_id;
     } else {
-        currentLeftLedColor = color_id;
+        ledColor_left = color_id;
     }
 }
 
@@ -373,7 +373,7 @@ void toggle_all_leds(void) {
     ledsOn = !ledsOn;
 
     if (ledsOn) {
-        robot_LEDs(currentLeftLedColor, currentRightLedColor);
+        robot_LEDs(ledColor_left, ledColor_right);
     } else {
         robot_LEDs(0, 0); // Turn off all LEDs
     }
@@ -392,38 +392,38 @@ void select_network(uint8_t index) {
 /**
  * @brief Handles going back in the menu hierarchy.
  */
-void go_back_in_menu(void) {
-    switch(currentMenu) {
+void menu_back(void) {
+    switch(visibleMenu) {
         case MODE_MENU:
         case SETTINGS_MENU:
-            currentMenu = MAIN_MENU;
+            visibleMenu = MAIN_MENU;
             menuContent = main_menu_items;
             current_menu_length = MAIN_MENU_LENGTH;
             break;
         case SPEED_MENU:
         case LED_COLORS_MENU:
-            currentMenu = SETTINGS_MENU;
+            visibleMenu = SETTINGS_MENU;
             menuContent = settings_menu_items;
             current_menu_length = SETTINGS_MENU_LENGTH;
             break;
         case SINGLE_LED_COLOR_MENU:
-            currentMenu = LED_COLORS_MENU;
+            visibleMenu = LED_COLORS_MENU;
             menuContent = led_colors_menu_items;
             current_menu_length = LED_COLORS_MENU_LENGTH;
             break;
         case CALIBRATE_LDR_MENU:
-            currentMenu = SETTINGS_MENU;
+            visibleMenu = SETTINGS_MENU;
             menuContent = settings_menu_items;
             current_menu_length = SETTINGS_MENU_LENGTH;
             break;
         case SELECT_NETWORK:
             wifi_started = 0;
-            currentMenu = SETTINGS_MENU;
+            visibleMenu = SETTINGS_MENU;
             menuContent = settings_menu_items;
             current_menu_length = SETTINGS_MENU_LENGTH;
             break;
         case ABOUT:
-            currentMenu = MAIN_MENU;
+            visibleMenu = MAIN_MENU;
             menuContent = main_menu_items;
             current_menu_length = MAIN_MENU_LENGTH;
             break;
@@ -433,7 +433,7 @@ void go_back_in_menu(void) {
     }
     menuIndex = 0;
     topIndex = 0;
-    update_menu_display();
+    menu_update();
 }
 
 /**
@@ -441,46 +441,46 @@ void go_back_in_menu(void) {
  * Handles menu navigation (switching between menus) and specific robot actions.
  * @param index The index of the selected item in the current menu.
  */
-void execute_menu_action(uint8_t index) {
-    switch(currentMenu) {
+void menu_click(uint8_t index) {
+    switch(visibleMenu) {
         case MAIN_MENU:
             switch(index) {
                 case 0: // "Start / Stop"
-                    robotRunning = !robotRunning;
-                    navigationMode = robotRunning; // Set navigationMode based on robotRunning
-                    update_robot_state_display();
-                    if (robotRunning) {
-                        // When starting, show current mode immediately
-                        display_navigation_info();
+                    inMovement = !inMovement;
+                    active = inMovement; // Set active based on inMovement
+                    status_display();
+                    if (inMovement) {
+                        // When starting, show current mode
+                        navigation_info_display();
                         ldr_display_counter = 0; // Initialize counter for LDR display
                     }
-                    return; // Don't fall through to update_menu_display as we're in a special state
+                    return; // Don't fall through to menu_update as we're in a special state
                 case 1: // "LEDS: ON/OFF"
                     toggle_all_leds();
                     break;
                 case 2: // "Mode"
-                    currentMenu = MODE_MENU;
+                    visibleMenu = MODE_MENU;
                     menuContent =  mode_names;
                     current_menu_length = MODE_MENU_LENGTH;
-                    menuIndex = currentNavigationMode;
+                    menuIndex = mode;
                     topIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
-                    update_menu_display();
+                    menu_update();
                     return;
                 case 3: // "Settings"
-                    currentMenu = SETTINGS_MENU;
+                    visibleMenu = SETTINGS_MENU;
                     menuContent = settings_menu_items;
                     current_menu_length = SETTINGS_MENU_LENGTH;
                     menuIndex = 0;
                     topIndex = 0;
-                    update_menu_display();
+                    menu_update();
                     return;
                 case 4: // "About"
-                    currentMenu = ABOUT;
+                    visibleMenu = ABOUT;
                     menuContent = about_items;
                     current_menu_length = ABOUT_MENU_LENGTH;
                     menuIndex = 0;
                     topIndex = 0;
-                    update_menu_display();
+                    menu_update();
                     return;
             }
             break;
@@ -488,145 +488,145 @@ void execute_menu_action(uint8_t index) {
         case SETTINGS_MENU:
             switch(index) {
                 case 0: // "Speed"
-                    currentMenu = SPEED_MENU;
+                    visibleMenu = SPEED_MENU;
                     menuContent = speed_menu_items;
                     current_menu_length = SPEED_MENU_LENGTH;
-                    menuIndex = currentSpeedIndex;
+                    menuIndex = speed_i;
                     topIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
-                    update_menu_display();
+                    menu_update();
                     return;
                 case 1: // "LED colors"
-                    currentMenu = LED_COLORS_MENU;
+                    visibleMenu = LED_COLORS_MENU;
                     menuContent = led_colors_menu_items;
                     current_menu_length = LED_COLORS_MENU_LENGTH;
                     menuIndex = 0;
                     topIndex = 0;
-                    update_menu_display();
+                    menu_update();
                     return;
                 case 2: // Calibrate LDRs
-                    currentMenu = CALIBRATE_LDR_MENU;
+                    visibleMenu = CALIBRATE_LDR_MENU;
                     menuContent = calibrate_ldrs_menu_items;
                     current_menu_length = LDR_MENU_LENGTH;
                     menuIndex = 0;
                     topIndex = 0;
-                    update_menu_display();
+                    menu_update();
                     return;
                 case 3: // Choose Wifi network
-                    currentMenu = SELECT_NETWORK;
+                    visibleMenu = SELECT_NETWORK;
                     menuContent = ssid_list;
                     current_menu_length = WIFI_MENU_LENGTH;
                     menuIndex = 0;
                     topIndex = 0;
-                    update_menu_display();
+                    menu_update();
                     return;
             }
             break;
 
         case MODE_MENU:
-            currentNavigationMode = index;
-            update_mode_display();
-            currentMenu = MAIN_MENU;
+            mode = index;
+            mode_display();
+            visibleMenu = MAIN_MENU;
             menuContent = main_menu_items;
             current_menu_length = MAIN_MENU_LENGTH;
             menuIndex = 0;
             topIndex = 0;
-            update_menu_display();
+            menu_update();
             return;
 
         case SPEED_MENU:
             set_robot_speed(index);
-            update_speed_display();
-            currentMenu = SETTINGS_MENU;
+            speed_display();
+            visibleMenu = SETTINGS_MENU;
             menuContent = settings_menu_items;
             current_menu_length = SETTINGS_MENU_LENGTH;
             menuIndex = 0;
             topIndex = 0;
-            update_menu_display();
+            menu_update();
             return;
 
         case LED_COLORS_MENU:
             switch(index) {
                 case 0: // "Right LED"
-                    currentMenu = SINGLE_LED_COLOR_MENU;
+                    visibleMenu = SINGLE_LED_COLOR_MENU;
                     menuContent = color_Names;
                     current_menu_length = NUM_SINGLE_COLORS;
-                    menuIndex = currentRightLedColor;
+                    menuIndex = ledColor_right;
                     topIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
                     settingRightLed = 1;
-                    update_menu_display();
+                    menu_update();
                     return;
                 case 1: // "Left LED"
-                    currentMenu = SINGLE_LED_COLOR_MENU;
+                    visibleMenu = SINGLE_LED_COLOR_MENU;
                     menuContent = color_Names;
                     current_menu_length = NUM_SINGLE_COLORS;
-                    menuIndex = currentLeftLedColor;
+                    menuIndex = ledColor_left;
                     topIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
                     settingRightLed = 0;
-                    update_menu_display();
+                    menu_update();
                     return;
             }
             break;
 
         case SINGLE_LED_COLOR_MENU:
             set_single_led_color(settingRightLed, index);
-            if (ledsOn) {robot_LEDs(currentLeftLedColor, currentRightLedColor);} // WHY AREN'T THE COLORS UPDATED AUTOMATICALLY?
-            update_single_led_display(settingRightLed);
-            currentMenu = LED_COLORS_MENU;
+            if (ledsOn) {robot_LEDs(ledColor_left, ledColor_right);} // WHY AREN'T THE COLORS UPDATED AUTOMATICALLY?
+            single_led_display(settingRightLed);
+            visibleMenu = LED_COLORS_MENU;
             menuContent = led_colors_menu_items;
             current_menu_length = LED_COLORS_MENU_LENGTH;
             menuIndex = (settingRightLed == 1) ? 0 : 1;
             topIndex = 0;
-            update_menu_display();
+            menu_update();
             return;
 
         case CALIBRATE_LDR_MENU:
             calibrate_LDR(index == 1); // MAX
-            update_ldr_calibration_display(index == 1);
-            currentMenu = CALIBRATE_LDR_MENU;
+            ldr_calibration_display(index == 1);
+            visibleMenu = CALIBRATE_LDR_MENU;
             menuContent = calibrate_ldrs_menu_items;
             current_menu_length = LDR_MENU_LENGTH;
             menuIndex = 0;
             topIndex = 0;
-            update_menu_display();
+            menu_update();
             return;
 
         case SELECT_NETWORK:
             select_network(index);
-            update_network_display();
-            currentMenu = MAIN_MENU;
+            network_display();
+            visibleMenu = MAIN_MENU;
             menuContent = main_menu_items;
             current_menu_length = MAIN_MENU_LENGTH;
             menuIndex = 0;
             topIndex = 0;
-            update_menu_display();
+            menu_update();
             return;
 
         case ABOUT:
-            update_about_display(index);
-            currentMenu = ABOUT;
+            about_display(index);
+            visibleMenu = ABOUT;
             menuContent = about_items;
             current_menu_length = ABOUT_MENU_LENGTH;
             menuIndex = 0;
             topIndex = 0;
-            update_menu_display();
+            menu_update();
             return;
     }
 
     delay_ms(1000); // Only execute this if an action didn't already return
-    update_menu_display();
+    menu_update();
 }
 
 
 /**
  * @brief Handles menu navigation based on joystick button presses.
  */
-void handle_menu(void) {
-    if (robotRunning) { // If robot is in a running/navigation mode
+void menu_loop(void) {
+    if (inMovement) { // If robot is in a running/navigation mode
         if (joystick_select_pressed) {
             joystick_select_pressed = 0; // Clear the flag
-            robotRunning = 0;          // Stop the robot
-            navigationMode = 0;        // Exit navigation mode
-            if (ledsOn) {robot_LEDs(currentLeftLedColor, currentRightLedColor);}
+            inMovement = 0;          // Stop the robot
+            active = 0;        // Exit navigation mode
+            if (ledsOn) {robot_LEDs(ledColor_left, ledColor_right);}
             else {robot_LEDs(0,0);}    // Set correct LED colors (if ON)
             init_menu();               // Go back to the main menu and display it
             delay_ms(200);             // Debounce delay
@@ -637,13 +637,13 @@ void handle_menu(void) {
         ldr_display_counter++;
         // Check if it's time to update the LDR display (100 * 10ms = 1000ms = 1 second)
         if (ldr_display_counter >= LDR_DISPLAY_PERIODS) {
-            display_navigation_info();
+            navigation_info_display();
             ldr_display_counter = 0; // Reset counter
         }
         
         // If robot is running, no other menu interactions (up, down, right) should occur
         // We only allow pressing LEFT to exit navigation mode.
-        // Other joystick presses while robotRunning will be ignored in this function.
+        // Other joystick presses while inMovement will be ignored in this function.
         delay_ms(MAIN_LOOP_DELAY_MS); 
         return; 
     }
@@ -656,7 +656,7 @@ void handle_menu(void) {
             if (menuIndex < topIndex) {
                 topIndex = menuIndex;
             }
-            update_menu_display();
+            menu_update();
         }
         delay_ms(200);
     }
@@ -667,18 +667,18 @@ void handle_menu(void) {
             if (menuIndex > topIndex + 1) {
                 topIndex++;
             }
-            update_menu_display();
+            menu_update();
         }
         delay_ms(200);
     }
     else if (joystick_right_pressed) {
         joystick_right_pressed = 0;
-        execute_menu_action(menuIndex);
+        menu_click(menuIndex);
         delay_ms(200);
     }
     else if (joystick_left_pressed) { // This is for going back in menus when not running
         joystick_left_pressed = 0;
-        go_back_in_menu();
+        menu_back();
         delay_ms(200);
     }
 }

@@ -24,7 +24,7 @@
 #define MOTOR_LEFT 1
 #define MOTOR_RIGHT 2
 #define MOTOR_BOTH 3
-#define STOP 0
+#define STOP_MOTORS 0
 #define FRONT 1
 #define BACK 2
 

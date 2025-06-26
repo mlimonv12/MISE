@@ -71,16 +71,16 @@ void wifi_control(void) {
                 switch (wifi_msg.id)
                 {
                     case LED_LEFT:
-                        currentLeftLedColor = wifi_msg.param[1];
+                        ledColor_left = wifi_msg.param[1];
                         break;
                     
                     case LED_RIGHT:
-                        currentRightLedColor = wifi_msg.param[1];
+                        ledColor_right = wifi_msg.param[1];
                         break;
 
                     default:
-                        currentLeftLedColor = wifi_msg.param[1];
-                        currentRightLedColor = wifi_msg.param[1];
+                        ledColor_left = wifi_msg.param[1];
+                        ledColor_right = wifi_msg.param[1];
                         break;
                 }
                 break;

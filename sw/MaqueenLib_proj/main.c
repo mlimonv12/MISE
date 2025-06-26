@@ -61,26 +61,21 @@ main(void) {
     // Main application loop
     while(1){
         // Handle menu interactions (joystick presses)
-        handle_menu();
-        //delay_ms(100); // Small delay for overall loop cycle
-        __no_operation(); // Placeholder for breakpoint during debugging
+        menu_loop();
 
-        // If in "Start" (navigation) mode, execute line-following logic
-        // The `navigationMode` variable is handled by the menu system.
-        if (navigationMode) {
-
-            switch (currentNavigationMode)
+        if (active) {
+            switch (mode)
             {
             case 0: // Follow light
-                follow_light(currentSpeed, max_light, min_light);
+                follow_light(speed, max_light, min_light);
                 break;
             
             case 1: // Escape light
-                escape_light(currentSpeed, max_light, min_light);
+                escape_light(speed, max_light, min_light);
                 break;
 
             case 2: // Line track
-                linetrack(currentSpeed);
+                linetrack(speed);
                 break;
 
             case 3: // Wi-fi control
@@ -89,11 +84,11 @@ main(void) {
                     wifi_init();
                 }
                 wifi_control();
-                robot_LEDs(currentLeftLedColor, currentRightLedColor);
+                robot_LEDs(ledColor_left, ledColor_right);
                 break;
 
             case 4: // Manual Mode
-                control_joystick(currentSpeed);
+                control_joystick(speed);
                 break;
 
             default:

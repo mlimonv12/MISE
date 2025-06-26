@@ -10,6 +10,7 @@
         "uart_alumnos.h": "c",
         "adc.h": "c",
         "*.bak": "c",
-        "*.bak2": "c"
+        "*.bak2": "c",
+        "wifi.h": "c"
     }
 }
