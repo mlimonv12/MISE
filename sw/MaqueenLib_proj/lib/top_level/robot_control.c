@@ -3,8 +3,9 @@
 
 #include "robot_control.h"
 #include "sensor_reading.h"
-#include "../low_level/i2c.h"    // For I2C_send, I2C_receive, ADDR_ROBOT
-#include "../low_level/timers.h" // For delay_ms
+#include "../low_level/i2c.h"
+#include "../low_level/timers.h"
+#include "../low_level/gpio.h"
 
 uint8_t motors_prev [4] = {1, 0, 1, 0}; // PREVIOUS: left_dir, left_speed, right_dir, right_speed
 uint8_t motors_next [4]; // NEXT: left_dir, left_speed, right_dir, right_speed
@@ -308,4 +309,25 @@ void escape_light(uint8_t speed, uint16_t *max_light, uint16_t *min_light)
     for (i = 0; i < 4; i++) {
         motors_prev[i] = motors_next[i];
     }
+}
+
+void control_joystick(uint8_t speed)
+{
+    if (joystick_up_pressed) {
+        motors(1, speed, 1, speed);
+        joystick_up_pressed = 0;
+
+    } else if (joystick_down_pressed){
+        motors(2, speed, 2, speed);
+        joystick_down_pressed = 0;
+
+    } else if (joystick_right_pressed) {
+        motors(1, speed, 0, 0);
+        joystick_right_pressed = 0;
+
+    } else if (joystick_left_pressed) {
+        motors(0, 0, 1, speed);
+        joystick_left_pressed = 0;
+
+    } 
 }

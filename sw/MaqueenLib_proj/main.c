@@ -92,7 +92,8 @@ main(void) {
                 robot_LEDs(currentLeftLedColor, currentRightLedColor);
                 break;
 
-            case 4: // Ultrasound
+            case 4: // Manual Mode
+                control_joystick(currentSpeed);
                 break;
 
             default:

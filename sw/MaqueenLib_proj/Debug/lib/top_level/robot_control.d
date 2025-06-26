@@ -21,6 +21,7 @@ lib/top_level/robot_control.obj: ../lib/top_level/robot_control.h
 lib/top_level/robot_control.obj: ../lib/top_level/sensor_reading.h
 lib/top_level/robot_control.obj: ../lib/low_level/i2c.h
 lib/top_level/robot_control.obj: ../lib/low_level/timers.h
+lib/top_level/robot_control.obj: ../lib/low_level/gpio.h
 
 ../lib/top_level/robot_control.c:
 
@@ -63,4 +64,6 @@ C:/ti/ccs1281/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/_stdint.h:
 ../lib/low_level/i2c.h:
 
 ../lib/low_level/timers.h:
+
+../lib/low_level/gpio.h:
 

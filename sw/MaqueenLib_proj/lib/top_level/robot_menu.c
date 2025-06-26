@@ -71,9 +71,10 @@ const char*  mode_names[] = {
     "Follow Light    ",
     "Escape Light    ",
     "Line Follow     ",
-    "Wi-Fi Control   "
+    "Wi-Fi Control   ",
+    "Hand Labour     " // Manual mode (wink wink)
 };
-#define MODE_MENU_LENGTH 4
+#define MODE_MENU_LENGTH (sizeof(mode_names) / sizeof(mode_names[0]))
 
 const char* settings_menu_items[] = {
     "Speed          ",
@@ -269,14 +270,7 @@ void update_single_led_display(uint8_t isRightLed) {
     memset(temp_buffer, ' ', sizeof(temp_buffer) - 1); // Fill with spaces initially
     temp_buffer[32] = '\0'; // Null-terminate the entire buffer
 
-    const char* line1_text = isRightLed ? "Right LED:" : "Left LED:";
-    const char* line2_text = color_Names[isRightLed ? currentRightLedColor : currentLeftLedColor];
-
-    int line1_len = strlen(line1_text);
-    int line2_len = strlen(line2_text);
-
-    strncpy(temp_buffer, line1_text, 16);
-    strncpy(&temp_buffer[16], line2_text, 16);
+    sprintf(temp_buffer, "%s      %s", isRightLed ? "Right LED:" : "Left LED: ", color_Names[isRightLed ? currentRightLedColor : currentLeftLedColor]);
 
     update_LCD(temp_buffer);
     delay_ms(1000);
@@ -628,10 +622,12 @@ void execute_menu_action(uint8_t index) {
  */
 void handle_menu(void) {
     if (robotRunning) { // If robot is in a running/navigation mode
-        if (joystick_left_pressed) {
-            joystick_left_pressed = 0; // Clear the flag
+        if (joystick_select_pressed) {
+            joystick_select_pressed = 0; // Clear the flag
             robotRunning = 0;          // Stop the robot
             navigationMode = 0;        // Exit navigation mode
+            if (ledsOn) {robot_LEDs(currentLeftLedColor, currentRightLedColor);}
+            else {robot_LEDs(0,0);}    // Set correct LED colors (if ON)
             init_menu();               // Go back to the main menu and display it
             delay_ms(200);             // Debounce delay
             return;                    // Exit the function to prevent further menu processing
@@ -675,14 +671,14 @@ void handle_menu(void) {
         }
         delay_ms(200);
     }
-    else if (EXECUTE_JS) {
-        EXECUTE_JS = 0;
+    else if (joystick_right_pressed) {
+        joystick_right_pressed = 0;
         execute_menu_action(menuIndex);
-        delay_ms(500);
+        delay_ms(200);
     }
     else if (joystick_left_pressed) { // This is for going back in menus when not running
         joystick_left_pressed = 0;
         go_back_in_menu();
-        delay_ms(500);
+        delay_ms(200);
     }
 }
