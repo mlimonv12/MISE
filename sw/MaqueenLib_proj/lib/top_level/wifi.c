@@ -23,7 +23,7 @@ void wifi_init(void) {
     // 1. Initial setup for Wi-Fi mode
     motors(0, 0, 0, 0); // Stop motors immediately upon entering Wi-Fi mode
     robot_LEDs(COLOR_RED, COLOR_BLUE); // Set LEDs to a default color (e.g., blue)
-    update_LCD("Wi-Fi Control"); // Display initial mode message on LCD
+    update_LCD("Initializing..."); // Display initial mode message on LCD
 
     // 2. Initialize ESP-01 module (as server or client, based on AT.h configuration)
     error_rx = init_servidor_esp(MODO_STA);
