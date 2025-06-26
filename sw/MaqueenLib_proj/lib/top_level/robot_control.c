@@ -11,6 +11,8 @@ uint8_t motors_next [4]; // NEXT: left_dir, left_speed, right_dir, right_speed
 uint8_t leds_state = 0;
 uint16_t ldr_vals [2];
 
+float ldr_scale = 0.8;
+
 uint8_t i = 0;
 
 /**
@@ -210,32 +212,37 @@ void linetrack(uint8_t speed)
 
 uint8_t follow_motors(uint8_t *previous, uint8_t *next, uint8_t speed, uint16_t *max_light, uint16_t *min_light)
 {
-    read_LDRs(&ldr_vals);
+    read_LDRs(ldr_vals);
+    uint16_t ldr_scaled [2];
+
+    // Scale and make sure it doesn't underflow
+    ldr_scaled[0] = (ldr_vals[0] >= min_light[0]) ? (ldr_vals[0] - min_light[0]) : 0;
+    ldr_scaled[1] = (ldr_vals[1] >= min_light[1]) ? (ldr_vals[1] - min_light[1]) : 0;
     
-    if ((ldr_vals[0] > (max_light[0] - min_light[0]) *0.8) && (ldr_vals[1] > (max_light[1] - min_light[1]) *0.8))
+    if ((ldr_scaled[0] > ((max_light[0] - min_light[0])*ldr_scale)) && (ldr_scaled[1] > ((max_light[1] - min_light[1])*ldr_scale)))
     {
-        next[0] = 2; // Enable left motor (direction 1: forward)
+        next[0] = 2; // Enable left motor
         next[2] = 2; // Enable right motor
         next[1] = speed; // Set left speed
         next[3] = speed; // Set right speed
     }
-    else if ((ldr_vals[1] > (max_light[1] - min_light[1])*0.8))
+    else if (ldr_scaled[1] > ((max_light[1] - min_light[1])*ldr_scale))
     {
-        next[0] = 2; // Enable left motor (direction 1: forward)
+        next[0] = 2; // Enable left motor
+        next[2] = 2; // Enable right motor
+        next[1] = speed*0.4; // Set left speed
+        next[3] = speed; // Set right speed
+    }
+    else if (ldr_scaled[0] > ((max_light[0] - min_light[0])*ldr_scale))
+    {
+        next[0] = 2; // Enable left motor
         next[2] = 2; // Enable right motor
         next[1] = speed; // Set left speed
-        next[3] = speed*0.2; // Set right speed
-    }
-    else if (ldr_vals[0] > (max_light[0] - min_light[0]) *0.8)
-    {
-        next[0] = 2; // Enable left motor (direction 1: forward)
-        next[2] = 2; // Enable right motor
-        next[1] = speed*0.2; // Set left speed
-        next[3] = speed; // Set right speed
+        next[3] = speed*0.4; // Set right speed
     }
     else
     {
-        next[0] = 2; // Enable left motor (direction 1: forward)
+        next[0] = 2; // Enable left motor
         next[2] = 2; // Enable right motor
         next[1] = 0; // Set left speed
         next[3] = 0; // Set right speed
@@ -256,26 +263,31 @@ void follow_light(uint8_t speed, uint16_t *max_light, uint16_t *min_light)
 uint8_t escape_motors(uint8_t *previous, uint8_t *next, uint8_t speed, uint16_t *max_light, uint16_t *min_light)
 {
     read_LDRs(ldr_vals);
+    uint16_t ldr_scaled [2];
+
+    // Scale and make sure it doesn't underflow
+    ldr_scaled[0] = (ldr_vals[0] >= min_light[0]) ? (ldr_vals[0] - min_light[0]) : 0;
+    ldr_scaled[1] = (ldr_vals[1] >= min_light[1]) ? (ldr_vals[1] - min_light[1]) : 0;
     
-    if ((ldr_vals[0] > (max_light[0] - min_light[0]) *0.8) && (ldr_vals[1] > (max_light[1] - min_light[1]) *0.8))
+    if ((ldr_scaled[0] > ((max_light[0] - min_light[0])*ldr_scale)) && (ldr_scaled[1] > ((max_light[1] - min_light[1])*ldr_scale)))
     {
         next[0] = 1; // Enable left motor (direction 2: backward)
         next[2] = 1; // Enable right motor
         next[1] = speed; // Set left speed
         next[3] = speed; // Set right speed
     }
-    else if ((ldr_vals[1] > (max_light[1] - min_light[1]) *0.8))
+    else if (ldr_scaled[1] > ((max_light[1] - min_light[1])*ldr_scale))
     {
         next[0] = 1; // Enable left motor (direction 2: backward)
         next[2] = 1; // Enable right motor
         next[1] = speed; // Set left speed
-        next[3] = speed*0.2; // Set right speed
+        next[3] = speed*0.4; // Set right speed
     }
-    else if (ldr_vals[0] > (max_light[0] - min_light[0]) *0.8)
+    else if (ldr_scaled[0] > ((max_light[0] - min_light[0])*ldr_scale))
     {
         next[0] = 1; // Enable left motor (direction 2: backward)
         next[2] = 1; // Enable right motor
-        next[1] = speed*0.2; // Set left speed
+        next[1] = speed*0.4; // Set left speed
         next[3] = speed; // Set right speed
     }
     else
