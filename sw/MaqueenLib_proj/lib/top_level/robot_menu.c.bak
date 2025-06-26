@@ -9,12 +9,12 @@
 #include "../low_level/timers.h" // For delay_ms
 #include "../low_level/gpio.h"    // For joystick button pressed flags
 
-// Menu state global variables 
+// Menu state global variables (defined here, matches extern in .h)
 uint8_t currentMenu = MAIN_MENU;
 uint8_t menuIndex = 0;
-uint8_t topIndex = 0;
+uint8_t topVisibleIndex = 0;
 
-// Robot state variables 
+// Robot state variables (defined here, matches extern in .h)
 uint8_t robotRunning = 0;
 uint8_t ledsOn = 0;
 uint8_t wifi_started = 0;
@@ -22,11 +22,14 @@ uint8_t wifi_started = 0;
 char ssid_sta [] = "BRCO";
 char pwd_sta [] = "SJT7b&$Te8BQFfvq5b";
 
-// Mode setting 
+// Mode setting (defined here, matches extern in .h)
+//const char* mode_names[NUM_MODES] = {
+//    "Follow Light", "Escape Light", "Line Track", "Wi-Fi Control", "Joystick Control"
+//};
 uint8_t currentNavigationMode = 0;
 uint8_t navigationMode = 0; // This flag indicates if the robot is in an active navigation state
 
-// Speed settings 
+// Speed settings (defined here, matches extern in .h)
 const char* speed_names[NUM_SPEEDS] = {"Slow", "Medium", "Fast", "Kuchauuu"};
 const uint8_t speed_values[NUM_SPEEDS] = {70, 170, 255, 10}; // Example values
 uint8_t currentSpeedIndex = 0;
@@ -41,30 +44,27 @@ uint8_t settingRightLed = 0;
 uint16_t max_light [2] = {3000, 3000};
 uint16_t min_light [2] = {800, 800};
 uint16_t ldr_vals[2]; // Added to store current LDR values
-uint32_t distance = 0;
 
 // Wi-Fi
 const char* ssid_list [] = {
     "BRCO",
-    "MiFibra-BFE6",
     "N12L"
 };
-const char* pwd_list [] = {"SJT7b&$Te8BQFfvq5b", "9pDHx4nV", "d1g1t4l!"};
+const char* pwd_list [] = {"SJT7b&$Te8BQFfvq5b", "d1g1t4l!"};
 #define WIFI_MENU_LENGTH (sizeof(ssid_list) / sizeof(ssid_list[0]))
 
-// Timing
+// Time tracking for LDR display (adapted for delay_ms)
 static uint16_t ldr_display_counter = 0;
 #define LDR_DISPLAY_INTERVAL_MS 100 // 1 second
 #define MAIN_LOOP_DELAY_MS 10       // Delay for main loop iteration
 #define LDR_DISPLAY_PERIODS (LDR_DISPLAY_INTERVAL_MS / MAIN_LOOP_DELAY_MS) // 100 periods of 10ms
 
-// Menu definitions 
+// Menu definitions (defined here, matches extern in .h)
 const char* main_menu_items[] = {
-    "Mode start      ",
-    "Mode select     ",
-    "Toggle LEDs     ",
-    "Settings        ",
-    "About           "
+    "Start Navigation",
+    "LEDS: ON/OFF    ",
+    "Mode            ",
+    "Settings        "
 };
 #define MAIN_MENU_LENGTH (sizeof(main_menu_items) / sizeof(main_menu_items[0]))
 
@@ -72,10 +72,9 @@ const char*  mode_names[] = {
     "Follow Light    ",
     "Escape Light    ",
     "Line Follow     ",
-    "Wi-Fi Control   ",
-    "Ultrasound      "
+    "Wi-Fi Control   "
 };
-#define MODE_MENU_LENGTH (sizeof( mode_names) / sizeof( mode_names[0]))
+#define MODE_MENU_LENGTH 4
 
 const char* settings_menu_items[] = {
     "Speed          ",
@@ -105,27 +104,14 @@ const char* calibrate_ldrs_menu_items[] = {
 };
 #define LDR_MENU_LENGTH 2
 
-const char* about_items[] = {
-    "Authors        ",
-    "Specs          "
-};
-#define ABOUT_MENU_LENGTH 2
-
-// LED color settings 
+// LED color settings (defined here, matches extern in .h)
 const char* color_Names[] = {
-     "Off           ",
-     "Red           ",
-     "Green         ",
-     "Yellow        ",
-     "Blue          ",
-     "Purple        ",
-     "Cyan          ",
-     "White         "
+     "Off", "Red", "Green", "Yellow", "Blue", "Purple", "Cyan", "White"
 };
 #define NUM_SINGLE_COLORS (sizeof(color_Names) / sizeof(color_Names[0]))
 
-// Current menu pointers 
-const char** menuContent = main_menu_items;
+// Current menu pointers (defined here, matches extern in .h)
+const char** current_menu = main_menu_items;
 uint8_t current_menu_length = MAIN_MENU_LENGTH;
 
 /**
@@ -134,8 +120,8 @@ uint8_t current_menu_length = MAIN_MENU_LENGTH;
 void init_menu(void) {
     currentMenu = MAIN_MENU;
     menuIndex = 0;
-    topIndex = 0;
-    menuContent = main_menu_items;
+    topVisibleIndex = 0;
+    current_menu = main_menu_items;
     current_menu_length = MAIN_MENU_LENGTH;
     navigationMode = 0; // Ensure navigation mode is off when initializing menu
     ldr_display_counter = 0; // Reset counter
@@ -156,14 +142,14 @@ void update_menu_display(void) {
 
     // --- Prepare Line 1 ---
     // Add cursor for the first visible item
-    if (menuIndex == topIndex) {
+    if (menuIndex == topVisibleIndex) {
         display_buffer[current_pos++] = '>';
     } else {
         display_buffer[current_pos++] = ' ';
     }
 
     // Copy the first visible menu item text
-    const char* item1_text = menuContent[topIndex];
+    const char* item1_text = current_menu[topVisibleIndex];
     int item1_len = strlen(item1_text);
     int copy_len1 = (item1_len > 15) ? 15 : item1_len; // Max 15 chars after '>' or ' '
     strncpy(&display_buffer[current_pos], item1_text, copy_len1);
@@ -176,16 +162,16 @@ void update_menu_display(void) {
 
     // --- Prepare Line 2 ---
     // Check if there's a second visible item
-    if (topIndex + 1 < current_menu_length) {
+    if (topVisibleIndex + 1 < current_menu_length) {
         // Add cursor for the second visible item
-        if (menuIndex == topIndex + 1) {
+        if (menuIndex == topVisibleIndex + 1) {
             display_buffer[current_pos++] = '>';
         } else {
             display_buffer[current_pos++] = ' ';
         }
 
         // Copy the second visible menu item text
-        const char* item2_text = menuContent[topIndex + 1];
+        const char* item2_text = current_menu[topVisibleIndex + 1];
         int item2_len = strlen(item2_text);
         int copy_len2 = (item2_len > 15) ? 15 : item2_len; // Max 15 chars after '>' or ' '
         strncpy(&display_buffer[current_pos], item2_text, copy_len2);
@@ -203,6 +189,8 @@ void update_menu_display(void) {
     }
 
     display_buffer[32] = '\0'; // Ensure the combined string is null-terminated
+
+    // Now, call the existing update_LCD function with the combined string
     update_LCD(display_buffer);
 }
 
@@ -215,20 +203,20 @@ void display_navigation_info(void) {
     temp_buffer[32] = '\0';
 
     // Line 1: Show current navigation mode
+    // Ensure the mode name doesn't overflow the first line (16 chars)
     strncpy(temp_buffer, mode_names[currentNavigationMode], 16);
 
-    // Line 2: Info
+    // Line 2: Show LDR values for specific modes
     if (currentNavigationMode == 0 || currentNavigationMode == 1) { // Follow Light or Escape Light
         read_LDRs(ldr_vals); // Read current LDR values
         sprintf(&temp_buffer[16], "%d        %d", (uint16_t)ldr_vals[1], (uint16_t)ldr_vals[0]);
-    } else if (currentNavigationMode == 4) { // Ultrasounds
-        read_ultrasound(distance);
-        sprintf(&temp_buffer[32], "Distance: %d cm", distance);
     } else {
         // For other modes, clear the second line or display a generic message
         memset(&temp_buffer[16], ' ', 16); // Fill with spaces
     }
-    update_LCD(temp_buffer);
+
+    if (currentNavigationMode != 3) // Don't want updates on Wifi mode
+        update_LCD(temp_buffer);
 }
 
 /**
@@ -236,6 +224,7 @@ void display_navigation_info(void) {
  */
 void update_robot_state_display(void) {
     char temp_buffer[33]; // Buffer for combined lines (16 + 16 + null)
+    // snprintf copies "Robot is" to line 1, and "RUNNING!" or "STOPPED." to line 2, padded
     snprintf(temp_buffer, sizeof(temp_buffer), "Robot is        %s", robotRunning ? "RUNNING!" : "STOPPED.");
     update_LCD(temp_buffer);
     delay_ms(1000);
@@ -276,8 +265,20 @@ void update_single_led_display(uint8_t isRightLed) {
     int line1_len = strlen(line1_text);
     int line2_len = strlen(line2_text);
 
+    // Copy first line text to the beginning of temp_buffer (max 16 chars)
     strncpy(temp_buffer, line1_text, 16);
+    // Note: strncpy does NOT null-terminate if source is longer than n.
+    // However, since we memset with spaces and then copy to a fixed size,
+    // any remaining space on the first 16 chars will be spaces.
+
+    // Copy second line text starting at buffer index 16 (for the second LCD line)
+    // and ensure it doesn't write past 16 characters for the second line.
     strncpy(&temp_buffer[16], line2_text, 16);
+
+    // No need for explicit padding here, as memset already filled with spaces,
+    // and strncpy will not write beyond the specified length, leaving trailing spaces.
+    // Also, the update_LCD function only processes the first 16 chars for the first line
+    // and the next 16 for the second line.
 
     update_LCD(temp_buffer);
     delay_ms(1000);
@@ -316,20 +317,6 @@ void update_network_display(void) {
     sprintf(temp_buffer, "Will connect to:%s", ssid_sta);
     update_LCD(temp_buffer);
     delay_ms(1500); // Show message for a bit longer
-}
-
-void update_about_display(uint8_t index) {
-    char temp_buffer[33];
-    memset(temp_buffer, ' ', sizeof(temp_buffer) - 1);
-    temp_buffer[32] = '\0';
-
-    if (!index)
-        sprintf(temp_buffer, "Adria Bru       Miquel Limon");
-    else
-        sprintf(temp_buffer, "Maqueen kuchau  MSP430FR255");
-    
-    update_LCD(temp_buffer);
-    delay_ms(3000); // Show message for a bit longer
 }
 
 /**
@@ -403,42 +390,36 @@ void go_back_in_menu(void) {
         case MODE_MENU:
         case SETTINGS_MENU:
             currentMenu = MAIN_MENU;
-            menuContent = main_menu_items;
+            current_menu = main_menu_items;
             current_menu_length = MAIN_MENU_LENGTH;
             break;
         case SPEED_MENU:
         case LED_COLORS_MENU:
             currentMenu = SETTINGS_MENU;
-            menuContent = settings_menu_items;
+            current_menu = settings_menu_items;
             current_menu_length = SETTINGS_MENU_LENGTH;
             break;
         case SINGLE_LED_COLOR_MENU:
             currentMenu = LED_COLORS_MENU;
-            menuContent = led_colors_menu_items;
+            current_menu = led_colors_menu_items;
             current_menu_length = LED_COLORS_MENU_LENGTH;
             break;
         case CALIBRATE_LDR_MENU:
             currentMenu = SETTINGS_MENU;
-            menuContent = settings_menu_items;
+            current_menu = settings_menu_items;
             current_menu_length = SETTINGS_MENU_LENGTH;
             break;
         case SELECT_NETWORK:
             wifi_started = 0;
             currentMenu = SETTINGS_MENU;
-            menuContent = settings_menu_items;
+            current_menu = settings_menu_items;
             current_menu_length = SETTINGS_MENU_LENGTH;
-            break;
-        case ABOUT:
-            currentMenu = MAIN_MENU;
-            menuContent = main_menu_items;
-            current_menu_length = MAIN_MENU_LENGTH;
-            break;
         case MAIN_MENU:
             // No action if already in main menu
             return;
     }
     menuIndex = 0;
-    topIndex = 0;
+    topVisibleIndex = 0;
     update_menu_display();
 }
 
@@ -448,44 +429,38 @@ void go_back_in_menu(void) {
  * @param index The index of the selected item in the current menu.
  */
 void execute_menu_action(uint8_t index) {
+    // update_LCD will handle clearing the screen by writing from (0,0)
+
     switch(currentMenu) {
         case MAIN_MENU:
             switch(index) {
-                case 0: // "Start"
+                case 0: // "Start / Stop"
                     robotRunning = !robotRunning;
                     navigationMode = robotRunning; // Set navigationMode based on robotRunning
                     update_robot_state_display();
                     if (robotRunning) {
                         // When starting, show current mode immediately
-                        display_navigation_info();
+                        display_navigation_info(); // Call the dedicated display function
                         ldr_display_counter = 0; // Initialize counter for LDR display
                     }
                     return; // Don't fall through to update_menu_display as we're in a special state
-                case 1: // "Mode"
-                    currentMenu = MODE_MENU;
-                    menuContent = mode_names;
-                    current_menu_length = MODE_MENU_LENGTH;
-                    menuIndex = currentNavigationMode;
-                    topIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
-                    update_menu_display();
-                    return;
-                case 2: // "LEDS: ON/OFF"
+                case 1: // "LEDS: ON/OFF"
                     toggle_all_leds();
                     break;
-                case 3: // "Settings"
-                    currentMenu = SETTINGS_MENU;
-                    menuContent = settings_menu_items;
-                    current_menu_length = SETTINGS_MENU_LENGTH;
-                    menuIndex = 0;
-                    topIndex = 0;
+                case 2: // "Mode"
+                    currentMenu = MODE_MENU;
+                    current_menu =  mode_names;
+                    current_menu_length = MODE_MENU_LENGTH;
+                    menuIndex = currentNavigationMode;
+                    topVisibleIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
                     update_menu_display();
                     return;
-                case 4: // "About"
-                    currentMenu = ABOUT;
-                    menuContent = about_items;
-                    current_menu_length = ABOUT_MENU_LENGTH;
+                case 3: // "Settings"
+                    currentMenu = SETTINGS_MENU;
+                    current_menu = settings_menu_items;
+                    current_menu_length = SETTINGS_MENU_LENGTH;
                     menuIndex = 0;
-                    topIndex = 0;
+                    topVisibleIndex = 0;
                     update_menu_display();
                     return;
             }
@@ -495,34 +470,34 @@ void execute_menu_action(uint8_t index) {
             switch(index) {
                 case 0: // "Speed"
                     currentMenu = SPEED_MENU;
-                    menuContent = speed_menu_items;
+                    current_menu = speed_menu_items;
                     current_menu_length = SPEED_MENU_LENGTH;
                     menuIndex = currentSpeedIndex;
-                    topIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
+                    topVisibleIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
                     update_menu_display();
                     return;
                 case 1: // "LED colors"
                     currentMenu = LED_COLORS_MENU;
-                    menuContent = led_colors_menu_items;
+                    current_menu = led_colors_menu_items;
                     current_menu_length = LED_COLORS_MENU_LENGTH;
                     menuIndex = 0;
-                    topIndex = 0;
+                    topVisibleIndex = 0;
                     update_menu_display();
                     return;
                 case 2: // Calibrate LDRs
                     currentMenu = CALIBRATE_LDR_MENU;
-                    menuContent = calibrate_ldrs_menu_items;
+                    current_menu = calibrate_ldrs_menu_items;
                     current_menu_length = LDR_MENU_LENGTH;
                     menuIndex = 0;
-                    topIndex = 0;
+                    topVisibleIndex = 0;
                     update_menu_display();
                     return;
                 case 3: // Choose Wifi network
                     currentMenu = SELECT_NETWORK;
-                    menuContent = ssid_list;
+                    current_menu = ssid_list;
                     current_menu_length = WIFI_MENU_LENGTH;
                     menuIndex = 0;
-                    topIndex = 0;
+                    topVisibleIndex = 0;
                     update_menu_display();
                     return;
             }
@@ -532,10 +507,10 @@ void execute_menu_action(uint8_t index) {
             currentNavigationMode = index;
             update_mode_display();
             currentMenu = MAIN_MENU;
-            menuContent = main_menu_items;
+            current_menu = main_menu_items;
             current_menu_length = MAIN_MENU_LENGTH;
             menuIndex = 0;
-            topIndex = 0;
+            topVisibleIndex = 0;
             update_menu_display();
             return;
 
@@ -543,10 +518,10 @@ void execute_menu_action(uint8_t index) {
             set_robot_speed(index);
             update_speed_display();
             currentMenu = SETTINGS_MENU;
-            menuContent = settings_menu_items;
+            current_menu = settings_menu_items;
             current_menu_length = SETTINGS_MENU_LENGTH;
             menuIndex = 0;
-            topIndex = 0;
+            topVisibleIndex = 0;
             update_menu_display();
             return;
 
@@ -554,19 +529,19 @@ void execute_menu_action(uint8_t index) {
             switch(index) {
                 case 0: // "Right LED"
                     currentMenu = SINGLE_LED_COLOR_MENU;
-                    menuContent = color_Names;
+                    current_menu = color_Names;
                     current_menu_length = NUM_SINGLE_COLORS;
                     menuIndex = currentRightLedColor;
-                    topIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
+                    topVisibleIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
                     settingRightLed = 1;
                     update_menu_display();
                     return;
                 case 1: // "Left LED"
                     currentMenu = SINGLE_LED_COLOR_MENU;
-                    menuContent = color_Names;
+                    current_menu = color_Names;
                     current_menu_length = NUM_SINGLE_COLORS;
                     menuIndex = currentLeftLedColor;
-                    topIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
+                    topVisibleIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
                     settingRightLed = 0;
                     update_menu_display();
                     return;
@@ -578,10 +553,10 @@ void execute_menu_action(uint8_t index) {
             if (ledsOn) {robot_LEDs(currentLeftLedColor, currentRightLedColor);} // WHY AREN'T THE COLORS UPDATED AUTOMATICALLY?
             update_single_led_display(settingRightLed);
             currentMenu = LED_COLORS_MENU;
-            menuContent = led_colors_menu_items;
+            current_menu = led_colors_menu_items;
             current_menu_length = LED_COLORS_MENU_LENGTH;
             menuIndex = (settingRightLed == 1) ? 0 : 1;
-            topIndex = 0;
+            topVisibleIndex = 0;
             update_menu_display();
             return;
 
@@ -589,10 +564,10 @@ void execute_menu_action(uint8_t index) {
             calibrate_LDR(index == 1); // MAX
             update_ldr_calibration_display(index == 1);
             currentMenu = CALIBRATE_LDR_MENU;
-            menuContent = calibrate_ldrs_menu_items;
+            current_menu = calibrate_ldrs_menu_items;
             current_menu_length = LDR_MENU_LENGTH;
             menuIndex = 0;
-            topIndex = 0;
+            topVisibleIndex = 0;
             update_menu_display();
             return;
 
@@ -600,22 +575,11 @@ void execute_menu_action(uint8_t index) {
             select_network(index);
             update_network_display();
             currentMenu = MAIN_MENU;
-            menuContent = main_menu_items;
+            current_menu = main_menu_items;
             current_menu_length = MAIN_MENU_LENGTH;
             menuIndex = 0;
-            topIndex = 0;
+            topVisibleIndex = 0;
             update_menu_display();
-            return;
-
-        case ABOUT:
-            update_about_display(index);
-            currentMenu = ABOUT;
-            menuContent = about_items;
-            current_menu_length = ABOUT_MENU_LENGTH;
-            menuIndex = 0;
-            topIndex = 0;
-            update_menu_display();
-            return;
     }
 
     delay_ms(1000); // Only execute this if an action didn't already return
@@ -632,6 +596,8 @@ void handle_menu(void) {
             joystick_left_pressed = 0; // Clear the flag
             robotRunning = 0;          // Stop the robot
             navigationMode = 0;        // Exit navigation mode
+            // Potentially call a robot_stop() function here if it exists in robot_control.h
+            // e.g., robot_stop_motors();
             init_menu();               // Go back to the main menu and display it
             delay_ms(200);             // Debounce delay
             return;                    // Exit the function to prevent further menu processing
@@ -648,6 +614,7 @@ void handle_menu(void) {
         // If robot is running, no other menu interactions (up, down, right) should occur
         // We only allow pressing LEFT to exit navigation mode.
         // Other joystick presses while robotRunning will be ignored in this function.
+        // Also, add a small delay so this loop doesn't hog the CPU too much when running
         delay_ms(MAIN_LOOP_DELAY_MS); 
         return; 
     }
@@ -657,8 +624,8 @@ void handle_menu(void) {
         joystick_up_pressed = 0;
         if (menuIndex > 0) {
             menuIndex--;
-            if (menuIndex < topIndex) {
-                topIndex = menuIndex;
+            if (menuIndex < topVisibleIndex) {
+                topVisibleIndex = menuIndex;
             }
             update_menu_display();
         }
@@ -668,8 +635,8 @@ void handle_menu(void) {
         joystick_down_pressed = 0;
         if (menuIndex < current_menu_length - 1) {
             menuIndex++;
-            if (menuIndex > topIndex + 1) {
-                topIndex++;
+            if (menuIndex > topVisibleIndex + 1) {
+                topVisibleIndex++;
             }
             update_menu_display();
         }

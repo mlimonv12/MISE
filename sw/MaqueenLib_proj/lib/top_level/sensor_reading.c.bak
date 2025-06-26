@@ -3,10 +3,6 @@
 #include "../low_level/adc.h" // For ADC_value, ADC_ISR, init_adc
 #include "../low_level/gpio.h" // For LDR_PINS and JS_ADC macros to enable/disable ADCIE
 
-uint32_t count_US = 0;
-uint16_t posedge, negedge;
-
-
 /**
  * @brief Reads analog values from the two Light Dependent Resistors (LDRs).
  * This function initiates ADC conversions for ADC channels A0 and A5,
@@ -87,66 +83,5 @@ void read_JS_analog(uint16_t *JS_reading)
     __no_operation();
 
     JS_reading[1] = ADC_value; // Store the converted value from A4
-}
-
-
-
-/**
- * @brief 
- * Performs an ultrasound reading.
- */
-void read_ultrasound(uint32_t *distance)
-{
-    // Request pulse
-    P6OUT |= US_TRIG;
-    delay_ms(1);
-    P6OUT &= ~US_TRIG;
-
-    // Received pulse is handled by Port6 ISR, distance value will be updated
-
-    distance = negedge - posedge;
-    delay_ms(15); // Small delay
-}
-
-
-
-
-
-
-//******************************************************************************
-// Port 6 Interrupt Service Routine (ISR) for Ultrasound ***********************
-//******************************************************************************
-#pragma vector=PORT6_VECTOR
-__interrupt void ultrasound(void)
-{
-
-    // Clear interrupt flags
-    P6IFG &= US_ECHO;
-
-    if (!(P6IN & US_ECHO)){     // Start counter and wait until next pulse
-        count_US = 0;
-        TB2CCTL0 |= CCIE;       // Enable TimerB2 interrupts
-        posedge = TB2CCR0;
-        P6IES |= US_ECHO;       // Switch port6 interrupt flags to high-to-low edge
-    } else {
-        TB2CCTL0 &= ~CCIE;      // Disable TimerB2 interrupts
-        float dist_float = count_US / 58; // To obtain the distance in centimeters
-        negedge = TB2CCR0;
-        //distance = (uint8_t)(dist_float + 0.5f); // To get a rounded value: we add 0.5 and then truncate to round to nearest integer
-        P6IES &= ~US_ECHO;      // Switch PORT6 interrupt flags to low-to-high edge
-    }
-
-}
-
-
-
-//******************************************************************************
-// Timer B1 Interrupt Service Routine (ISR) ************************************
-//******************************************************************************
-#pragma vector = TIMER2_B0_VECTOR
-__interrupt void timerB2_0_isr(void)
-{
-    TB2CCTL0 &= ~CCIFG; // Clear the Timer B1 Capture/Compare Interrupt Flag (CCIFG) for CCR0
-    count_US++;          // Increment the global counter
 }
 
