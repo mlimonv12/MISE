@@ -58,8 +58,6 @@ main(void) {
     uint8_t stat_next[4];
     uint8_t leds_state = 0; // Stores the state returned by calculate_motors (e.g., STRAIGHT, TURN_L)
 
-    uint16_t LDR_reading[2]; // Array to store LDR sensor values
-
     // Main application loop
     while(1){
         // Handle menu interactions (joystick presses)
@@ -94,7 +92,7 @@ main(void) {
                 robot_LEDs(currentLeftLedColor, currentRightLedColor);
                 break;
 
-            case 4: // Joystick control
+            case 4: // Ultrasound
                 break;
 
             default:

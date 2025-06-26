@@ -18,11 +18,6 @@
 // LCD Reset pin
 #define LCD_RST_PIN BIT4 // P2.4
 
-// Ultrasound pins
-#define US_TRIG BIT2
-#define US_ECHO BIT3
-#define US_BITS (BIT3 | BIT2) // (BIT0 | BIT1)
-
 // Global flags for joystick button presses (declared extern)
 extern volatile uint8_t joystick_up_pressed;
 extern volatile uint8_t joystick_down_pressed;

@@ -35,4 +35,6 @@ extern wifi_info wifi_msg;
 // Declare the main Wi-Fi control function
 void wifi_control(void);
 
+void wifi_init(void);
+
 #endif /* WIFI_H_ */

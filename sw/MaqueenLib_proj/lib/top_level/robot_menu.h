@@ -4,17 +4,17 @@
 #include <stdint.h> // For uint8_t
 
 // Menu States
-#define MAIN_MENU           0
-#define MODE_MENU           1
-#define SETTINGS_MENU       2
-#define SPEED_MENU          3
-#define LED_COLORS_MENU     4
-#define SINGLE_LED_COLOR_MENU 5
-#define CALIBRATE_LDR_MENU 6
-#define SELECT_NETWORK 7
-#define ABOUT 8
+#define MAIN_MENU               0
+#define MODE_MENU               1
+#define SETTINGS_MENU           2
+#define SPEED_MENU              3
+#define LED_COLORS_MENU         4
+#define SINGLE_LED_COLOR_MENU   5
+#define CALIBRATE_LDR_MENU      6
+#define SELECT_NETWORK          7
+#define ABOUT                   8
 
-// Global variables for menu state 
+// Global variables for menu state (declared extern)
 extern uint8_t currentMenu;
 extern uint8_t menuIndex;
 extern uint8_t topIndex;
@@ -42,6 +42,8 @@ extern uint16_t max_light [2];
 extern uint16_t min_light [2];
 
 // LED color settings
+//#define NUM_SINGLE_COLORS   7
+//extern const char* color_Names[];
 extern uint8_t currentRightLedColor;
 extern uint8_t currentLeftLedColor;
 extern uint8_t settingRightLed;
@@ -50,7 +52,7 @@ extern uint8_t settingRightLed;
 extern char ssid_sta [];
 extern char pwd_sta [];
 
-// Menu item definitions 
+// Menu item definitions (declared extern)
 extern const char* main_menu_items[];
 extern const char* settings_menu_items[];
 extern const char* mode_menu_items[];
@@ -58,8 +60,8 @@ extern const char* speed_menu_items[];
 extern const char* led_colors_menu_items[];
 extern const char* single_led_color_menu_items[];
 
-// Current menu pointers 
-extern const char** menuContent;
+// Current menu pointers (declared extern)
+extern const char** current_menu;
 extern uint8_t current_menu_length;
 
 

@@ -3,7 +3,6 @@
 
 // Definition of the global counter variable, initialized to 0
 volatile uint32_t count = 0;
-//volatile uint32_t count_US = 0;
 
 /**
  * @brief Initializes Timer B0 for 1ms tick generation.
@@ -13,15 +12,8 @@ volatile uint32_t count = 0;
 void init_timers()
 {
     TB0CCR0 = 16000; // 16000 cycles = 0.001s = 1ms (assuming SMCLK is 16MHz)
-
-    // Ultrasound timer
-    TB2CCR0 = 16; // 16 cycles = 0.000001 = 1us
-
     TB0CTL |= (TBCLR | TBSSEL__SMCLK); // Clear timer, select SMCLK as source
-    TB2CTL |= (TBCLR | TBSSEL__SMCLK); // Clear timer, select SMCLK as source
-    // TB0CTL |= (TBCLR | TBSSEL__SMCLK | MC__UP); // Original: already in UPMODE, but delay_ms manages mode
     TB0CCTL0 &= ~CCIE; // Disable interrupts for CCR0 initially
-    TB2CCTL0 &= ~CCIE; // Disable interrupts initially
 }
 
 /**
@@ -55,3 +47,4 @@ __interrupt void timerB0_0_isr(void)
     TB0CTL &= ~CCIFG; // Clear the Timer B0 Capture/Compare Interrupt Flag (CCIFG) for CCR0
     count++;          // Increment the global counter
 }
+

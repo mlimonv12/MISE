@@ -9,6 +9,7 @@
         "robot_menu.h": "c",
         "uart_alumnos.h": "c",
         "adc.h": "c",
-        "*.bak": "c"
+        "*.bak": "c",
+        "*.bak2": "c"
     }
 }

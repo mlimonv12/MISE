@@ -28,22 +28,34 @@ void init_GPIOs()
     P2SEL0 &= ~LCD_RST_PIN;
     P2SEL1 &= ~LCD_RST_PIN;
 
+    // Initialize ultrasound pins
+    P6SEL0 &= ~US_BITS;
+    P6SEL1 &= ~US_BITS;
+
     P3DIR &= ~JS_BITS; // Set Joystick pins (P3.0, P3.2, P3.3, P3.4, P3.5) as inputs
     P2DIR |= LCD_RST_PIN; // Set P2.4 as output for LCD RST
+    P6DIR &= ~US_ECHO;
+    P6DIR |= US_TRIG;
 
     // Configure pull-up/pull-down resistors for Joystick inputs
     P3REN |= (JS_SEL | JS_B | JS_F | JS_R | JS_L); // Enable pull resistors for all JS pins
+    P6REN |= US_ECHO;
 
     P3OUT |= JS_BITS; // All joystick inputs pulled high (pull-up resistors)
                       // This means buttons should pull the pin to ground when pressed.
 
     P2OUT &= ~LCD_RST_PIN; // LCD RST Initially set to low (for reset sequence)
+    P6OUT &= US_TRIG; // US input is pulled down, and
 
     P3IFG &= ~JS_BITS; // Clear any pending Joystick interrupt flags
     P3IE |= JS_BITS; // Enable interrupts for all Joystick pins
 
+    P6IFG &= ~US_BITS; // Clear ultrasound flags
+    P6IE |= US_ECHO; // Enable ultrasound interrupts
+
     // Set interrupt edge for High-to-low transition (button pressed from idle high)
     P3IES |= JS_BITS;
+    P6IES &= ~US_ECHO; // Set ultrasound interrupts initially at a low-to-high transition
 }
 
 //******************************************************************************

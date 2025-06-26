@@ -28,34 +28,22 @@ void init_GPIOs()
     P2SEL0 &= ~LCD_RST_PIN;
     P2SEL1 &= ~LCD_RST_PIN;
 
-    // Initialize ultrasound pins
-    P6SEL0 &= ~US_BITS;
-    P6SEL1 &= ~US_BITS;
-
     P3DIR &= ~JS_BITS; // Set Joystick pins (P3.0, P3.2, P3.3, P3.4, P3.5) as inputs
     P2DIR |= LCD_RST_PIN; // Set P2.4 as output for LCD RST
-    P6DIR &= ~US_ECHO;
-    P6DIR |= US_TRIG;
 
     // Configure pull-up/pull-down resistors for Joystick inputs
     P3REN |= (JS_SEL | JS_B | JS_F | JS_R | JS_L); // Enable pull resistors for all JS pins
-    P6REN |= US_ECHO;
 
     P3OUT |= JS_BITS; // All joystick inputs pulled high (pull-up resistors)
                       // This means buttons should pull the pin to ground when pressed.
 
     P2OUT &= ~LCD_RST_PIN; // LCD RST Initially set to low (for reset sequence)
-    P6OUT &= US_TRIG; // US input is pulled down, and
 
     P3IFG &= ~JS_BITS; // Clear any pending Joystick interrupt flags
     P3IE |= JS_BITS; // Enable interrupts for all Joystick pins
 
-    P6IFG &= ~US_BITS; // Clear ultrasound flags
-    P6IE |= US_ECHO; // Enable ultrasound interrupts
-
     // Set interrupt edge for High-to-low transition (button pressed from idle high)
     P3IES |= JS_BITS;
-    P6IES &= ~US_ECHO; // Set ultrasound interrupts initially at a low-to-high transition
 }
 
 //******************************************************************************
@@ -64,22 +52,10 @@ void init_GPIOs()
 #pragma vector=PORT3_VECTOR
 __interrupt void readjoystick(void)
 {
-    // Reading P3IV clears the highest priority interrupt flag and returns its value.
-    // This is the most reliable way to handle multiple flags in a single ISR.
     uint16_t P3IV_val = P3IV;
 
-    // Acknowledge all flags to prevent re-entry if not using P3IV with switch.
-    // Or, more precisely, P3IFG &= ~JS_BITS; can be used if P3IV isn't fully utilized in switch.
-    // Using P3IV for switch cases handles clearing automatically for the matched case.
-    // However, if multiple flags are set, only the highest priority is processed by P3IV.
-    // So, clearing all flags explicitly is often safer if you don't care about priority.
-    P3IFG &= ~JS_BITS; // Clear all Port 3 interrupt flags (crucial for ensuring flags are cleared)
+    P3IFG &= ~JS_BITS; // Clear all Port 3 interrupt flags
 
-
-    // Check the individual button states by reading the input register directly,
-    // and setting flags based on the detected low (pressed) state.
-    // P3IN & BIT0 is `1` if P3.0 is high, `0` if P3.0 is low.
-    // Since we set pull-ups, a press means the pin goes low.
     if (!(P3IN & JS_F)) { // If Forward (P3.4) is pressed (goes low)
         joystick_up_pressed = 1;
     }

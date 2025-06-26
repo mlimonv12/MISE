@@ -7,7 +7,7 @@ HOST = '0.0.0.0'  # Accept connections from any IP
 PORT = 8082  # Listening port (updated from user's provided snippet)
 
 # Robot connection settings
-ROBOT_IP = "192.168.0.99"  # Updated from user's provided snippet
+ROBOT_IP = "192.168.0.143"  # Updated from user's provided snippet
 ROBOT_PORT = 80 # Updated from user's provided snippet
 
 # Robot command mappings

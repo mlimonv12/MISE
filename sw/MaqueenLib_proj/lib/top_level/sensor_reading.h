@@ -3,6 +3,9 @@
 
 #include <stdint.h> // For uint16_t
 
+extern uint32_t count_US;
+extern uint16_t posedge, negedge;
+
 /**
  * @brief Reads analog values from the two Light Dependent Resistors (LDRs).
  * This function initiates ADC conversions for ADC channels A0 and A5,
@@ -22,6 +25,11 @@ void read_LDRs(uint16_t *LDR_reading);
  * where the readings from Joystick X (A1) and Joystick Y (A4) will be stored.
  */
 void read_JS_analog(uint16_t *JS_reading);
+
+uint32_t read_ultrasound(void);
+
+#pragma vector=PORT6_VECTOR
+__interrupt void ultrasound(void);
 
 #endif /* SENSOR_READING_H_ */
 

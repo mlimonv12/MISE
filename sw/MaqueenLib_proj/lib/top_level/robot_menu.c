@@ -9,12 +9,12 @@
 #include "../low_level/timers.h" // For delay_ms
 #include "../low_level/gpio.h"    // For joystick button pressed flags
 
-// Menu state global variables 
+// Menu state global variables (defined here, matches extern in .h)
 uint8_t currentMenu = MAIN_MENU;
 uint8_t menuIndex = 0;
 uint8_t topIndex = 0;
 
-// Robot state variables 
+// Robot state variables (defined here, matches extern in .h)
 uint8_t robotRunning = 0;
 uint8_t ledsOn = 0;
 uint8_t wifi_started = 0;
@@ -22,11 +22,11 @@ uint8_t wifi_started = 0;
 char ssid_sta [] = "BRCO";
 char pwd_sta [] = "SJT7b&$Te8BQFfvq5b";
 
-// Mode setting 
+// Mode setting (defined here, matches extern in .h)
 uint8_t currentNavigationMode = 0;
 uint8_t navigationMode = 0; // This flag indicates if the robot is in an active navigation state
 
-// Speed settings 
+// Speed settings (defined here, matches extern in .h)
 const char* speed_names[NUM_SPEEDS] = {"Slow", "Medium", "Fast", "Kuchauuu"};
 const uint8_t speed_values[NUM_SPEEDS] = {70, 170, 255, 10}; // Example values
 uint8_t currentSpeedIndex = 0;
@@ -40,8 +40,7 @@ uint8_t settingRightLed = 0;
 // LDR calibration readings
 uint16_t max_light [2] = {3000, 3000};
 uint16_t min_light [2] = {800, 800};
-uint16_t ldr_vals[2]; // Added to store current LDR values
-uint32_t distance = 0;
+uint16_t ldr_vals  [2];
 
 // Wi-Fi
 const char* ssid_list [] = {
@@ -52,17 +51,17 @@ const char* ssid_list [] = {
 const char* pwd_list [] = {"SJT7b&$Te8BQFfvq5b", "9pDHx4nV", "d1g1t4l!"};
 #define WIFI_MENU_LENGTH (sizeof(ssid_list) / sizeof(ssid_list[0]))
 
-// Timing
+// Time tracking for LDR display (adapted for delay_ms)
 static uint16_t ldr_display_counter = 0;
 #define LDR_DISPLAY_INTERVAL_MS 100 // 1 second
 #define MAIN_LOOP_DELAY_MS 10       // Delay for main loop iteration
 #define LDR_DISPLAY_PERIODS (LDR_DISPLAY_INTERVAL_MS / MAIN_LOOP_DELAY_MS) // 100 periods of 10ms
 
-// Menu definitions 
+// Menu definitions (defined here, matches extern in .h)
 const char* main_menu_items[] = {
-    "Mode start      ",
-    "Mode select     ",
+    "Start           ",
     "Toggle LEDs     ",
+    "Mode select     ",
     "Settings        ",
     "About           "
 };
@@ -72,10 +71,9 @@ const char*  mode_names[] = {
     "Follow Light    ",
     "Escape Light    ",
     "Line Follow     ",
-    "Wi-Fi Control   ",
-    "Ultrasound      "
+    "Wi-Fi Control   "
 };
-#define MODE_MENU_LENGTH (sizeof( mode_names) / sizeof( mode_names[0]))
+#define MODE_MENU_LENGTH 4
 
 const char* settings_menu_items[] = {
     "Speed          ",
@@ -111,7 +109,7 @@ const char* about_items[] = {
 };
 #define ABOUT_MENU_LENGTH 2
 
-// LED color settings 
+// LED color settings (defined here, matches extern in .h)
 const char* color_Names[] = {
      "Off           ",
      "Red           ",
@@ -124,7 +122,7 @@ const char* color_Names[] = {
 };
 #define NUM_SINGLE_COLORS (sizeof(color_Names) / sizeof(color_Names[0]))
 
-// Current menu pointers 
+// Current menu pointers (defined here, matches extern in .h)
 const char** menuContent = main_menu_items;
 uint8_t current_menu_length = MAIN_MENU_LENGTH;
 
@@ -203,6 +201,8 @@ void update_menu_display(void) {
     }
 
     display_buffer[32] = '\0'; // Ensure the combined string is null-terminated
+
+    // Now, call the existing update_LCD function with the combined string
     update_LCD(display_buffer);
 }
 
@@ -217,18 +217,17 @@ void display_navigation_info(void) {
     // Line 1: Show current navigation mode
     strncpy(temp_buffer, mode_names[currentNavigationMode], 16);
 
-    // Line 2: Info
+    // Line 2: Show LDR values for specific modes
     if (currentNavigationMode == 0 || currentNavigationMode == 1) { // Follow Light or Escape Light
         read_LDRs(ldr_vals); // Read current LDR values
         sprintf(&temp_buffer[16], "%d        %d", (uint16_t)ldr_vals[1], (uint16_t)ldr_vals[0]);
-    } else if (currentNavigationMode == 4) { // Ultrasounds
-        read_ultrasound(distance);
-        sprintf(&temp_buffer[32], "Distance: %d cm", distance);
     } else {
         // For other modes, clear the second line or display a generic message
         memset(&temp_buffer[16], ' ', 16); // Fill with spaces
     }
-    update_LCD(temp_buffer);
+
+    if (currentNavigationMode != 3) // Don't want updates on Wifi mode
+        update_LCD(temp_buffer);
 }
 
 /**
@@ -236,6 +235,7 @@ void display_navigation_info(void) {
  */
 void update_robot_state_display(void) {
     char temp_buffer[33]; // Buffer for combined lines (16 + 16 + null)
+    // snprintf copies "Robot is" to line 1, and "RUNNING!" or "STOPPED." to line 2, padded
     snprintf(temp_buffer, sizeof(temp_buffer), "Robot is        %s", robotRunning ? "RUNNING!" : "STOPPED.");
     update_LCD(temp_buffer);
     delay_ms(1000);
@@ -308,15 +308,6 @@ void update_ldr_calibration_display(uint8_t isMaxLight) {
     delay_ms(1500); // Show message for a bit longer
 }
 
-void update_network_display(void) {
-    char temp_buffer[33];
-    memset(temp_buffer, ' ', sizeof(temp_buffer) - 1);
-    temp_buffer[32] = '\0';
-
-    sprintf(temp_buffer, "Will connect to:%s", ssid_sta);
-    update_LCD(temp_buffer);
-    delay_ms(1500); // Show message for a bit longer
-}
 
 void update_about_display(uint8_t index) {
     char temp_buffer[33];
@@ -330,6 +321,16 @@ void update_about_display(uint8_t index) {
     
     update_LCD(temp_buffer);
     delay_ms(3000); // Show message for a bit longer
+}
+
+void update_network_display(void) {
+    char temp_buffer[33];
+    memset(temp_buffer, ' ', sizeof(temp_buffer) - 1);
+    temp_buffer[32] = '\0';
+
+    sprintf(temp_buffer, "Will connect to:%s", ssid_sta);
+    update_LCD(temp_buffer);
+    delay_ms(1500); // Show message for a bit longer
 }
 
 /**
@@ -451,27 +452,27 @@ void execute_menu_action(uint8_t index) {
     switch(currentMenu) {
         case MAIN_MENU:
             switch(index) {
-                case 0: // "Start"
+                case 0: // "Start / Stop"
                     robotRunning = !robotRunning;
                     navigationMode = robotRunning; // Set navigationMode based on robotRunning
                     update_robot_state_display();
                     if (robotRunning) {
                         // When starting, show current mode immediately
-                        display_navigation_info();
+                        display_navigation_info(); // Call the dedicated display function
                         ldr_display_counter = 0; // Initialize counter for LDR display
                     }
                     return; // Don't fall through to update_menu_display as we're in a special state
-                case 1: // "Mode"
+                case 1: // "LEDS: ON/OFF"
+                    toggle_all_leds();
+                    break;
+                case 2: // "Mode"
                     currentMenu = MODE_MENU;
-                    menuContent = mode_names;
+                    menuContent =  mode_names;
                     current_menu_length = MODE_MENU_LENGTH;
                     menuIndex = currentNavigationMode;
                     topIndex = (menuIndex > 0) ? menuIndex - 1 : 0;
                     update_menu_display();
                     return;
-                case 2: // "LEDS: ON/OFF"
-                    toggle_all_leds();
-                    break;
                 case 3: // "Settings"
                     currentMenu = SETTINGS_MENU;
                     menuContent = settings_menu_items;
@@ -605,7 +606,7 @@ void execute_menu_action(uint8_t index) {
             menuIndex = 0;
             topIndex = 0;
             update_menu_display();
-            return;
+            return; // MAYBE THIS IS IT
 
         case ABOUT:
             update_about_display(index);
