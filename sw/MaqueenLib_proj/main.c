@@ -33,9 +33,9 @@ main(void) {
     // Initialize all necessary hardware components using low-level libraries
     init_clocks();      // Configure system clocks
     init_timers();      // Configure timers for delays
-    init_i2c();         // Configure I2C communication
     init_GPIOs();       // Configure General Purpose I/Os (including joystick digital inputs)
-    init_adc();         // Initialize ADC module (was in GPIO, moved for better separation)
+    init_adc();         // Initialize ADC module
+    init_i2c();         // Configure I2C communication
     init_uart_wifi();   // Configure UART for Wi-Fi module communication
 
     // Initial robot and display setup
@@ -45,18 +45,8 @@ main(void) {
     delay_ms(500);      // Wait for 500ms
     robot_LEDs(0, 0);   // Change LED colors
 
-    // Attempt to communicate with AT module (e.g., Wi-Fi module)
-    volatile uint8_t at = comando_AT(); // Stores the result of AT command, though not used further
-
     init_LCD();         // Initialize the LCD display
-    init_menu();        // NEW: Initialize the menu system (displays main menu)
-
-    // Variables for robot control and sensor readings
-    // stat_prev: Stores previous motor directions and speeds (left_dir, left_speed, right_dir, right_speed)
-    uint8_t stat_prev[4] = {1, 50, 1, 50}; // Initial motor state (forward at speed 50)
-    // stat_next: Stores calculated next motor directions and speeds
-    uint8_t stat_next[4];
-    uint8_t leds_state = 0; // Stores the state returned by calculate_motors (e.g., STRAIGHT, TURN_L)
+    init_menu();        // Initialize the menu system (displays main menu)
 
     // Main application loop
     while(1){
@@ -66,34 +56,33 @@ main(void) {
         if (active) {
             switch (mode)
             {
-            case 0: // Follow light
-                follow_light(speed, max_light, min_light);
-                break;
-            
-            case 1: // Escape light
-                escape_light(speed, max_light, min_light);
-                break;
+                case 0: // Follow light
+                    follow_light(speed, max_light, min_light);
+                    break;
+                
+                case 1: // Escape light
+                    escape_light(speed, max_light, min_light);
+                    break;
 
-            case 2: // Line track
-                linetrack(speed);
-                break;
+                case 2: // Line track
+                    linetrack(speed);
+                    break;
 
-            case 3: // Wi-fi control
-                if (!wifi_started) {
-                    wifi_started = 1;
-                    wifi_init();
-                }
-                wifi_control();
-                robot_LEDs(ledColor_left, ledColor_right);
-                break;
+                case 3: // Wi-fi control
+                    if (!wifi_started) {
+                        wifi_started = 1;
+                        wifi_init();
+                    }
+                    wifi_control();
+                    break;
 
-            case 4: // Manual Mode
-                control_joystick(speed);
-                break;
+                case 4: // Manual Mode
+                    control_joystick(speed);
+                    break;
 
-            default:
-                motors(0,0,0,0); // Stop motors if out of navigation mode
-                break;
+                default:
+                    motors(0,0,0,0); // Stop motors if out of navigation mode
+                    break;
             }
         }
         else

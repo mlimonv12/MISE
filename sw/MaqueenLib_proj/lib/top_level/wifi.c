@@ -104,6 +104,8 @@ void wifi_control(void) {
             default:
                 break;
         }
+        
+        robot_LEDs(ledColor_left, ledColor_right);
     }
     else
     {
