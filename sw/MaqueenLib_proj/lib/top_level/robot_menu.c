@@ -235,7 +235,6 @@ void display_navigation_info(void) {
  */
 void update_robot_state_display(void) {
     char temp_buffer[33]; // Buffer for combined lines (16 + 16 + null)
-    // snprintf copies "Robot is" to line 1, and "RUNNING!" or "STOPPED." to line 2, padded
     snprintf(temp_buffer, sizeof(temp_buffer), "Robot is        %s", robotRunning ? "RUNNING!" : "STOPPED.");
     update_LCD(temp_buffer);
     delay_ms(1000);
@@ -458,7 +457,7 @@ void execute_menu_action(uint8_t index) {
                     update_robot_state_display();
                     if (robotRunning) {
                         // When starting, show current mode immediately
-                        display_navigation_info(); // Call the dedicated display function
+                        display_navigation_info();
                         ldr_display_counter = 0; // Initialize counter for LDR display
                     }
                     return; // Don't fall through to update_menu_display as we're in a special state
@@ -606,7 +605,7 @@ void execute_menu_action(uint8_t index) {
             menuIndex = 0;
             topIndex = 0;
             update_menu_display();
-            return; // MAYBE THIS IS IT
+            return;
 
         case ABOUT:
             update_about_display(index);
@@ -676,14 +675,14 @@ void handle_menu(void) {
         }
         delay_ms(200);
     }
-    else if (joystick_right_pressed) {
-        joystick_right_pressed = 0;
+    else if (EXECUTE_JS) {
+        EXECUTE_JS = 0;
         execute_menu_action(menuIndex);
-        delay_ms(200);
+        delay_ms(500);
     }
     else if (joystick_left_pressed) { // This is for going back in menus when not running
         joystick_left_pressed = 0;
         go_back_in_menu();
-        delay_ms(200);
+        delay_ms(500);
     }
 }

@@ -32,10 +32,9 @@ void init_GPIOs()
     P2DIR |= LCD_RST_PIN; // Set P2.4 as output for LCD RST
 
     // Configure pull-up/pull-down resistors for Joystick inputs
-    P3REN |= (JS_SEL | JS_B | JS_F | JS_R | JS_L); // Enable pull resistors for all JS pins
+    P3REN |= JS_BITS; // Enable pull resistors for all JS pins
 
     P3OUT |= JS_BITS; // All joystick inputs pulled high (pull-up resistors)
-                      // This means buttons should pull the pin to ground when pressed.
 
     P2OUT &= ~LCD_RST_PIN; // LCD RST Initially set to low (for reset sequence)
 
@@ -53,22 +52,23 @@ void init_GPIOs()
 __interrupt void readjoystick(void)
 {
     uint16_t P3IV_val = P3IV;
+    P3IE &= ~JS_BITS; // Disable interrupt
 
     P3IFG &= ~JS_BITS; // Clear all Port 3 interrupt flags
 
     if (!(P3IN & JS_F)) { // If Forward (P3.4) is pressed (goes low)
         joystick_up_pressed = 1;
-    }
-    if (!(P3IN & JS_B)) { // If Back/down is pressed (goes low) -> acting as DOWN in menu
+
+    } else if (!(P3IN & JS_B)) { // If Back/down is pressed (goes low) -> acting as DOWN in menu
         joystick_down_pressed = 1;
-    }
-    if (!(P3IN & JS_SEL)) { // If Select is pressed (goes low)
+
+    } else if (!(P3IN & JS_SEL)) { // If Select is pressed (goes low)
         joystick_select_pressed = 1;
-    }
-    if (!(P3IN & JS_L)) { // If Left is pressed (goes low)
+
+    } else if (!(P3IN & JS_L)) { // If Left is pressed (goes low)
         joystick_left_pressed = 1;
-    }
-    if (!(P3IN & JS_R)) { // If Right is pressed (goes low) - currently unused in menu
+
+    } else if (!(P3IN & JS_R)) { // If Right is pressed (goes low) - currently unused in menu
         joystick_right_pressed = 1;
     }
 

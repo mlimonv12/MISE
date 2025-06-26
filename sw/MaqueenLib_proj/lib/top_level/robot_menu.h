@@ -14,6 +14,15 @@
 #define SELECT_NETWORK          7
 #define ABOUT                   8
 
+// Choose if we want to press the JS or just move right
+//#define PRESS // Use JS press
+
+#ifdef  PRESS
+#define EXECUTE_JS joystick_select_pressed
+#else
+#define EXECUTE_JS joystick_right_pressed
+#endif
+
 // Global variables for menu state (declared extern)
 extern uint8_t currentMenu;
 extern uint8_t menuIndex;

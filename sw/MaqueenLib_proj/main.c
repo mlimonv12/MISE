@@ -35,7 +35,7 @@ main(void) {
     init_timers();      // Configure timers for delays
     init_i2c();         // Configure I2C communication
     init_GPIOs();       // Configure General Purpose I/Os (including joystick digital inputs)
-    init_adc();         // NEW: Initialize ADC module (was in GPIO, moved for better separation)
+    init_adc();         // Initialize ADC module (was in GPIO, moved for better separation)
     init_uart_wifi();   // Configure UART for Wi-Fi module communication
 
     // Initial robot and display setup

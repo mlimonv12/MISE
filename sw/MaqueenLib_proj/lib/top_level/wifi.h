@@ -10,14 +10,14 @@
 #define LED_RIGHT   0x02
 
 // LED Colors for Wi-Fi commands
-#define COLOR_OFF   0x00
-#define COLOR_RED   0x01
-#define COLOR_GREEN 0x02
-#define COLOR_BLUE  0x03
-#define COLOR_YELLOW 0x04
-#define COLOR_MAGENTA 0x05
-#define COLOR_CYAN 0x06
-#define COLOR_WHITE 0x07
+#define COLOR_OFF       0x00
+#define COLOR_RED       0x01
+#define COLOR_GREEN     0x02
+#define COLOR_YELLOW    0x03
+#define COLOR_BLUE      0x04
+#define COLOR_PRUPLE    0x05
+#define COLOR_CYAN      0x06
+#define COLOR_WHITE     0x07
 
 // Motor controls
 #define MOTORS 0x20
