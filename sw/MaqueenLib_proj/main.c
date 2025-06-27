@@ -75,12 +75,6 @@ main(void) {
                         wifi_started = 1;
                         wifi_init();
                     }
-                    
-                    if (buzzer_on)
-                        TB2CCTL0 |= CCIE;
-                    else
-                        TB2CCTL0 &= ~CCIE;
-
                     wifi_control();
                     break;
 

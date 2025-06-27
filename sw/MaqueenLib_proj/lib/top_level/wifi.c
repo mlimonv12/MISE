@@ -111,6 +111,12 @@ void wifi_control(void) {
                 break;
         }
         
+        // "Claxon" control through timer
+        if (buzzer_on)
+            TB2CCTL0 |= CCIE;
+        else
+            TB2CCTL0 &= ~CCIE;
+            
         robot_LEDs(ledColor_left, ledColor_right);
     }
     else
