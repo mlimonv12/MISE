@@ -28,6 +28,10 @@
 #define FRONT 1
 #define BACK 2
 
+// Buzzer control
+#define BUZZ_COM 0x21
+extern uint8_t buzzer_on; 
+
 extern StrConexion conexion;
 extern RxReturn wifi_rx;
 extern wifi_info wifi_msg;

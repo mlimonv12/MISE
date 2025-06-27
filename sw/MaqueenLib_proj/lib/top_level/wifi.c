@@ -15,6 +15,7 @@ wifi_info wifi_msg;
 
 // Misc
 uint8_t _i = 0;
+uint8_t buzzer_on = 0;
 
 void wifi_init(void) {
     uint8_t error_rx = 0;
@@ -100,6 +101,11 @@ void wifi_control(void) {
                         motors(wifi_msg.param[2], wifi_msg.param[1], wifi_msg.param[2], wifi_msg.param[1]);
                         break;
                 }
+                break;
+
+            case BUZZ_COM:
+                buzzer_on = wifi_msg.param[1];
+                break;
 
             default:
                 break;

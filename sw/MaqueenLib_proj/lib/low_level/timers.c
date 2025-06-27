@@ -12,8 +12,12 @@ volatile uint32_t count = 0;
 void init_timers()
 {
     TB0CCR0 = 16000; // 16000 cycles = 0.001s = 1ms (assuming SMCLK is 16MHz)
-    TB0CTL |= (TBCLR | TBSSEL__SMCLK); // Clear timer, select SMCLK as source
+    TB0CTL |= (TBCLR | TBSSEL__SMCLK | MC__UP); // Clear timer, select SMCLK as source
     TB0CCTL0 &= ~CCIE; // Disable interrupts for CCR0 initially
+
+    TB2CCR0 = 16000; // 16000 cycles = 0.001s = 1ms (assuming SMCLK is 16MHz)
+    TB2CTL |= (TBCLR | TBSSEL__SMCLK | MC__UP); // Clear timer, select SMCLK as source
+    TB2CCTL0 &= ~CCIE; // Disable interrupts for CCR0 initially
 }
 
 /**
@@ -47,4 +51,3 @@ __interrupt void timerB0_0_isr(void)
     TB0CTL &= ~CCIFG; // Clear the Timer B0 Capture/Compare Interrupt Flag (CCIFG) for CCR0
     count++;          // Increment the global counter
 }
-

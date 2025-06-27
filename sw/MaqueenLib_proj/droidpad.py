@@ -11,9 +11,10 @@ ROBOT_IP = "192.168.0.143"
 ROBOT_PORT = 80
 
 # Robot command mappings
-comandos = {"LEDS RGB": 0x19, "Motores": 0x20}
-identificadores = {"Left": 1, "Right": 2, "Both": 0xFE}
+comandos = {"LEDS RGB": 0x19, "Motores": 0x20, "Buzzer": 0x21}
+identificadores = {"BUZZER": 0, "Left": 1, "Right": 2, "Both": 0xFE}
 estados = {"OFF": 0, "FORWARD": 1, "BACKWARD": 2}
+buzzer = {"OFF": 0, "ON": 1}
 
 # Global variables for robot state
 current_speed = 0  # 0-255 for motors, from the 'Speed' slider
@@ -200,6 +201,24 @@ try:
                                     last_right_led_color = led_color
                             except Exception as e:
                                 print(f"Error sending LED command to robot: {e}")
+                                
+                    elif event_id == 'BUZZER' and event_type == 'BUTTON':
+                        state = json_obj.get('state')
+                        print(f"BUZZER command: {state}")
+                        
+                        if state == 'PRESS':
+                            params = [buzzer["ON"], 0, 0, 0]
+                        elif state == 'RELEASE':
+                            params = [buzzer["OFF"], 0, 0, 0]
+                            
+                        buzzer_command = create_command_packet("Buzzer", "BUZZER", params)
+                        print(f"Sending BUZZER command ({event_id}): {buzzer_command.hex()}")
+                        
+                        wait_for_next_command() # Apply rate limit before sending
+                        try:
+                            robot_socket.send(buzzer_command)
+                        except Exception as e:
+                            print(f"Error sending BUZZER command to robot: {e}")
 
                 except json.JSONDecodeError:
                     # Partial JSON or malformed JSON, break from inner loop to receive more data

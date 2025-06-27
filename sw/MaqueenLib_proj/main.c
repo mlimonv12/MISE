@@ -75,6 +75,12 @@ main(void) {
                         wifi_started = 1;
                         wifi_init();
                     }
+                    
+                    if (buzzer_on)
+                        TB2CCTL0 |= CCIE;
+                    else
+                        TB2CCTL0 &= ~CCIE;
+
                     wifi_control();
                     break;
 
@@ -90,6 +96,7 @@ main(void) {
         else
         {
             wifi_started = 0;
+            buzzer_on = 0;
             motors(0,0,0,0); // Stop motors if out of navigation mode
         }
         

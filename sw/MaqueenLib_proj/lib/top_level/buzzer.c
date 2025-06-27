@@ -22,3 +22,10 @@ void pipip_car(void) {
         delay_ms(1);
     }
 }
+
+#pragma vector=TIMER2_B0_VECTOR
+__interrupt void timerB2_buzzer_ISR(void)
+{
+    TB2CTL &= ~CCIFG; // Clear the Timer B2 Capture/Compare Interrupt Flag (CCIFG) for CCR0
+    P6OUT ^= BUZZER;
+}
