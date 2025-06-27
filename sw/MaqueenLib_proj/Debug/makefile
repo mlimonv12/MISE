@@ -18,6 +18,7 @@ ORDERED_OBJS += \
 "./lib/low_level/i2c.obj" \
 "./lib/low_level/timers.obj" \
 "./lib/low_level/uart.obj" \
+"./lib/top_level/buzzer.obj" \
 "./lib/top_level/lcd_control.obj" \
 "./lib/top_level/robot_control.obj" \
 "./lib/top_level/robot_menu.obj" \
@@ -158,8 +159,8 @@ MaqueenLib_proj.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)
-	-$(RM) "main.obj" "lib\low_level\AT.obj" "lib\low_level\adc.obj" "lib\low_level\clocks.obj" "lib\low_level\gpio.obj" "lib\low_level\i2c.obj" "lib\low_level\timers.obj" "lib\low_level\uart.obj" "lib\top_level\lcd_control.obj" "lib\top_level\robot_control.obj" "lib\top_level\robot_menu.obj" "lib\top_level\sensor_reading.obj" "lib\top_level\wifi.obj" 
-	-$(RM) "main.d" "lib\low_level\AT.d" "lib\low_level\adc.d" "lib\low_level\clocks.d" "lib\low_level\gpio.d" "lib\low_level\i2c.d" "lib\low_level\timers.d" "lib\low_level\uart.d" "lib\top_level\lcd_control.d" "lib\top_level\robot_control.d" "lib\top_level\robot_menu.d" "lib\top_level\sensor_reading.d" "lib\top_level\wifi.d" 
+	-$(RM) "main.obj" "lib\low_level\AT.obj" "lib\low_level\adc.obj" "lib\low_level\clocks.obj" "lib\low_level\gpio.obj" "lib\low_level\i2c.obj" "lib\low_level\timers.obj" "lib\low_level\uart.obj" "lib\top_level\buzzer.obj" "lib\top_level\lcd_control.obj" "lib\top_level\robot_control.obj" "lib\top_level\robot_menu.obj" "lib\top_level\sensor_reading.obj" "lib\top_level\wifi.obj" 
+	-$(RM) "main.d" "lib\low_level\AT.d" "lib\low_level\adc.d" "lib\low_level\clocks.d" "lib\low_level\gpio.d" "lib\low_level\i2c.d" "lib\low_level\timers.d" "lib\low_level\uart.d" "lib\top_level\buzzer.d" "lib\top_level\lcd_control.d" "lib\top_level\robot_control.d" "lib\top_level\robot_menu.d" "lib\top_level\sensor_reading.d" "lib\top_level\wifi.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

@@ -6,6 +6,7 @@
 "./lib/low_level/i2c.obj"
 "./lib/low_level/timers.obj"
 "./lib/low_level/uart.obj"
+"./lib/top_level/buzzer.obj"
 "./lib/top_level/lcd_control.obj"
 "./lib/top_level/robot_control.obj"
 "./lib/top_level/robot_menu.obj"

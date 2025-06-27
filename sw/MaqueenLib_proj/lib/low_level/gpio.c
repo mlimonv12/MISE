@@ -28,14 +28,19 @@ void init_GPIOs()
     P2SEL0 &= ~LCD_RST_PIN;
     P2SEL1 &= ~LCD_RST_PIN;
 
+    // Initialize BUZZER pin
+    P6SEL0 &= ~BUZZER;
+    P6SEL1 &= ~BUZZER;
+
     P3DIR &= ~JS_BITS; // Set Joystick pins (P3.0, P3.2, P3.3, P3.4, P3.5) as inputs
     P2DIR |= LCD_RST_PIN; // Set P2.4 as output for LCD RST
+    P6DIR |= BUZZER;
+    P6OUT &= ~BUZZER; // Start at low
 
     // Configure pull-up/pull-down resistors for Joystick inputs
     P3REN |= JS_BITS; // Enable pull resistors for all JS pins
 
     P3OUT |= JS_BITS; // All joystick inputs pulled high (pull-up resistors)
-
     P2OUT &= ~LCD_RST_PIN; // LCD RST Initially set to low (for reset sequence)
 
     P3IFG &= ~JS_BITS; // Clear any pending Joystick interrupt flags

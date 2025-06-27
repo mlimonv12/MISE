@@ -19,6 +19,7 @@
 #include "./lib/top_level/sensor_reading.h"
 #include "./lib/top_level/robot_menu.h"
 #include "./lib/top_level/wifi.h"
+#include "./lib/top_level/buzzer.h"
 
 // Variables
 
@@ -38,9 +39,10 @@ main(void) {
     init_i2c();         // Configure I2C communication
     init_uart_wifi();   // Configure UART for Wi-Fi module communication
 
-    // Initial robot and display setup
+    // Initial robot sequence
     robot_LEDs(5, 5);   // Set initial LED colors
     delay_ms(500);      // Wait for 500ms
+    pipip_car();
     robot_LEDs(6, 6);   // Change LED colors
     delay_ms(500);      // Wait for 500ms
     robot_LEDs(0, 0);   // Change LED colors
