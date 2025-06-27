@@ -1,7 +1,7 @@
 ******************************************************************************
                   MSP430 Linker PC v21.6.1                     
 ******************************************************************************
->> Linked Fri Jun 27 13:58:59 2025
+>> Linked Fri Jun 27 15:11:58 2025
 
 OUTPUT FILE NAME:   <MaqueenLib_proj.out>
 ENTRY POINT SYMBOL: "_c_int00_noargs_mpu"  address: 0000b4f0
@@ -142,12 +142,12 @@ section   page    origin      length       input sections
                   00009222    00000164     rts430x_lc_sd_eabi.lib : frcmpyd.c.obj (.text:__TI_frcmpyd)
                   00009386    0000013a     robot_menu.obj (.text:menu_update)
                   000094c0    00000132     AT.obj (.text:init_servidor_esp)
-                  000095f2    00000116     lcd_control.obj (.text:display_LCD)
-                  00009708    0000010e     rts430x_lc_sd_eabi.lib : _printfi.c.obj (.text:__TI_printfi_minimal:_setfield___TI_printfi_minimal)
-                  00009816    0000010c     robot_menu.obj (.text:menu_loop)
-                  00009922    00000108     main.obj (.text:main)
-                  00009a2a    00000106     wifi.obj (.text:wifi_control)
-                  00009b30    00000100     robot_control.obj (.text:linetrack_motors)
+                  000095f2    0000011a     wifi.obj (.text:wifi_control)
+                  0000970c    00000116     lcd_control.obj (.text:display_LCD)
+                  00009822    0000010e     rts430x_lc_sd_eabi.lib : _printfi.c.obj (.text:__TI_printfi_minimal:_setfield___TI_printfi_minimal)
+                  00009930    0000010c     robot_menu.obj (.text:menu_loop)
+                  00009a3c    00000100     robot_control.obj (.text:linetrack_motors)
+                  00009b3c    000000f4     main.obj (.text:main)
                   00009c30    000000ee     rts430x_lc_sd_eabi.lib : copy_decompress_lzss.c.obj (.text:decompress:lzss:__TI_decompress_lzss)
                   00009d1e    000000e2                            : _printfi.c.obj (.text:__TI_printfi_minimal:__TI_printfi_minimal)
                   00009e00    000000c4                            : _printfi.c.obj (.text:__TI_printfi_minimal:_pproc_diouxp___TI_printfi_minimal)
@@ -409,9 +409,9 @@ MODULE SUMMARY
        Module                       code    ro data   rw data
        ------                       ----    -------   -------
     .\
-       main.obj                     264     0         0      
+       main.obj                     244     0         0      
     +--+----------------------------+-------+---------+---------+
-       Total:                       264     0         0      
+       Total:                       244     0         0      
                                                              
     .\lib\low_level\
        AT.obj                       1394    288       20     
@@ -427,12 +427,12 @@ MODULE SUMMARY
     .\lib\top_level\
        robot_menu.obj               2544    904       135    
        robot_control.obj            1610    0         19     
-       wifi.obj                     372     76        527    
+       wifi.obj                     392     76        527    
        lcd_control.obj              474     4         0      
        sensor_reading.obj           140     0         1      
        buzzer.obj                   104     2         0      
     +--+----------------------------+-------+---------+---------+
-       Total:                       5244    986       682    
+       Total:                       5264    986       682    
                                                              
     C:\ti\ccs1281\ccs\ccs_base\msp430\lib\FR2xx\FRWP_INIT_LIB_CCS_msp430_large_code_small_data.lib
        frwp_init.obj                60      0         0      
@@ -1567,7 +1567,7 @@ ffffffff  __c_args__
 00002258  current_menu_length                    
 00008cbe  decodificar_trama                      
 0000a93a  delay_ms                               
-000095f2  display_LCD                            
+0000970c  display_LCD                            
 000086e8  echo_OFF                               
 000086f0  echo_ON                                
 0000a89e  escape_light                           
@@ -1608,9 +1608,9 @@ ffffffff  __c_args__
 0000224a  ledsOn                                 
 00002296  leds_state                             
 0000a156  linetrack                              
-00009b30  linetrack_motors                       
+00009a3c  linetrack_motors                       
 000086dc  local_IP                               
-00009922  main                                   
+00009b3c  main                                   
 0000226a  main_menu_items                        
 000022c2  max_light                              
 0000b224  memccpy                                
@@ -1620,7 +1620,7 @@ ffffffff  __c_args__
 00002247  menuIndex                              
 0000a0be  menu_back                              
 0000870c  menu_click                             
-00009816  menu_loop                              
+00009930  menu_loop                              
 00009386  menu_update                            
 000022c6  min_light                              
 0000224c  mode                                   
@@ -1680,7 +1680,7 @@ ffffffff  __c_args__
 00002248  topIndex                               
 0000b360  update_LCD                             
 00002246  visibleMenu                            
-00009a2a  wifi_control                           
+000095f2  wifi_control                           
 0000a46a  wifi_init                              
 00002204  wifi_msg                               
 00002000  wifi_rx                                
@@ -2690,11 +2690,11 @@ address   name
 00009222  __TI_frcmpyd                           
 00009386  menu_update                            
 000094c0  init_servidor_esp                      
-000095f2  display_LCD                            
-00009816  menu_loop                              
-00009922  main                                   
-00009a2a  wifi_control                           
-00009b30  linetrack_motors                       
+000095f2  wifi_control                           
+0000970c  display_LCD                            
+00009930  menu_loop                              
+00009a3c  linetrack_motors                       
+00009b3c  main                                   
 00009c30  __TI_decompress_lzss                   
 00009d1e  __TI_printfi_minimal                   
 00009ec4  __mspabi_mpyf                          
