@@ -23,9 +23,6 @@ void read_LDRs(uint16_t *LDR_reading)
     ADCMCTL0 |= ADCINCH_0;              // Select A0 (P1.0) as input channel
     ADCCTL0 |= ADCENC | ADCSC;          // Enable ADC and start conversion
 
-    // Enter Low Power Mode 0 (LPM0) and enable general interrupts (GIE).
-    // The CPU will wait here until the ADC conversion completes and its ISR
-    // wakes the CPU up by clearing LPM0_bits.
     __bis_SR_register(LPM0_bits + GIE);
     __no_operation(); // Placeholder for breakpoint during debugging
 
@@ -40,7 +37,7 @@ void read_LDRs(uint16_t *LDR_reading)
 
     // Wait again for the ADC conversion to complete
     __bis_SR_register(LPM0_bits + GIE);
-    __no_operation(); // Placeholder for breakpoint during debugging
+    __no_operation();
 
     LDR_reading[1] = ADC_value; // Store the converted value from A5
 }
