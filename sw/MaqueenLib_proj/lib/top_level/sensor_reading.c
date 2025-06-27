@@ -3,6 +3,8 @@
 #include "../low_level/adc.h" // For ADC_value, ADC_ISR, init_adc
 #include "../low_level/gpio.h" // For LDR_PINS and JS_ADC macros to enable/disable ADCIE
 
+uint8_t samples = 0;
+
 /**
  * @brief Reads analog values from the two Light Dependent Resistors (LDRs).
  * This function initiates ADC conversions for ADC channels A0 and A5,
@@ -14,32 +16,41 @@
  */
 void read_LDRs(uint16_t *LDR_reading)
 {
-    // Enable ADC interrupts for LDR pins (specifically ADCIE for ADCMEM0, as only one is used)
-    ADCIE |= 0x31; // (BIT0 | BIT5) Enable ADC interrupt for A0 and A5 (LDR_PINS)
+    samples = 0;
+    LDR_reading[0] = 0; // Start at 0
+    LDR_reading[1] = 0;
 
-    // First LDR (connected to A0)
-    ADCCTL0 &= ~ADCENC;                 // Disable ADC to configure
-    ADCMCTL0 &= ~ADCINCH_15;            // Clear previous channel selection
-    ADCMCTL0 |= ADCINCH_0;              // Select A0 (P1.0) as input channel
-    ADCCTL0 |= ADCENC | ADCSC;          // Enable ADC and start conversion
+    for (samples = 0; samples < 8; samples++) {
+        ADCIE |= 0x31; // (BIT0 | BIT5) Enable ADC interrupt for A0 and A5 (LDR_PINS)
 
-    __bis_SR_register(LPM0_bits + GIE);
-    __no_operation(); // Placeholder for breakpoint during debugging
+        // First LDR (connected to A0)
+        ADCCTL0 &= ~ADCENC;                 // Disable ADC to configure
+        ADCMCTL0 &= ~ADCINCH_15;            // Clear previous channel selection
+        ADCMCTL0 |= ADCINCH_0;              // Select A0 (P1.0) as input channel
+        ADCCTL0 |= ADCENC | ADCSC;          // Enable ADC and start conversion
 
-    LDR_reading[0] = ADC_value; // Store the converted value from A0
+        __bis_SR_register(LPM0_bits + GIE);
+        __no_operation(); // Placeholder for breakpoint during debugging
 
-    // Second LDR (connected to A5)
-    ADCIE |= 0x31;
-    ADCCTL0 &= ~ADCENC;                 // Disable ADC to configure
-    ADCMCTL0 &= ~ADCINCH_15;            // Clear previous channel selection
-    ADCMCTL0 |= ADCINCH_5;              // Select A5 (P1.5) as input channel
-    ADCCTL0 |= ADCENC | ADCSC;          // Enable ADC and start conversion
+        LDR_reading[0] += ADC_value; // Add the converted value from A0
 
-    // Wait again for the ADC conversion to complete
-    __bis_SR_register(LPM0_bits + GIE);
-    __no_operation();
+        // Second LDR (connected to A5)
+        ADCIE |= 0x31;
+        ADCCTL0 &= ~ADCENC;                 // Disable ADC to configure
+        ADCMCTL0 &= ~ADCINCH_15;            // Clear previous channel selection
+        ADCMCTL0 |= ADCINCH_5;              // Select A5 (P1.5) as input channel
+        ADCCTL0 |= ADCENC | ADCSC;          // Enable ADC and start conversion
 
-    LDR_reading[1] = ADC_value; // Store the converted value from A5
+        // Wait again for the ADC conversion to complete
+        __bis_SR_register(LPM0_bits + GIE);
+        __no_operation();
+
+        LDR_reading[1] += ADC_value; // Add the converted value from A5
+    }
+
+    LDR_reading[0] = LDR_reading[0] >> 2; // Divide by 8 (number of samples)
+    LDR_reading[1] = LDR_reading[1] >> 2;
+
 }
 
 
