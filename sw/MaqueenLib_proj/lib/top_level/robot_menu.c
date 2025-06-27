@@ -72,7 +72,7 @@ const char*  mode_names[] = {
     "Escape Light    ",
     "Line Follow     ",
     "Wi-Fi Control   ",
-    "Hand Labour     " // Manual mode (wink wink)
+    "Manual Mode     " // Manual mode (wink wink)
 };
 #define MODE_MENU_LENGTH (sizeof(mode_names) / sizeof(mode_names[0]))
 

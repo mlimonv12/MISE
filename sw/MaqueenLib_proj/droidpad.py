@@ -4,11 +4,11 @@ import time
 
 # Define server settings
 HOST = '0.0.0.0'  # Accept connections from any IP
-PORT = 8082  # Listening port (updated from user's provided snippet)
+PORT = 8082  # Listening port
 
 # Robot connection settings
-ROBOT_IP = "192.168.0.143"  # Updated from user's provided snippet
-ROBOT_PORT = 80 # Updated from user's provided snippet
+ROBOT_IP = "192.168.0.143"
+ROBOT_PORT = 80
 
 # Robot command mappings
 comandos = {"LEDS RGB": 0x19, "Motores": 0x20}
@@ -18,7 +18,7 @@ estados = {"OFF": 0, "FORWARD": 1, "BACKWARD": 2}
 # Global variables for robot state
 current_speed = 0  # 0-255 for motors, from the 'Speed' slider
 last_command_sent_time = 0.0
-COMMAND_INTERVAL_MS = 100 # Updated from user's provided snippet
+COMMAND_INTERVAL_MS = 100
 COMMAND_INTERVAL_SEC = COMMAND_INTERVAL_MS / 1000.0
 
 # Global variables to track last LED states to prevent redundant commands
@@ -95,7 +95,7 @@ try:
             break # Exit if other errors occur during accept (e.g., server_socket closed)
 
     if client_socket is None: # If we broke the loop without accepting a client (e.g., due to an error)
-        raise KeyboardInterrupt # Simulate Ctrl+C to trigger graceful shutdown
+        raise KeyboardInterrupt # Simulate Ctrl+C to trigger shutdown
 
     # Use a buffer to handle partial JSON messages
     buffer = ""
@@ -178,9 +178,6 @@ try:
                         print(f"Updated speed: {current_speed}")
 
                     elif (event_id == 'LEFT_LED' or event_id == 'RIGHT_LED') and event_type == 'SLIDER':
-                        # Declare global variables BEFORE any usage or assignment in this block
-                        #global last_left_led_color, last_right_led_color 
-
                         value = json_obj.get('value', 0)
                         led_color = int(value) # Convert float to int
                         led_color = max(0, min(7, led_color)) # Clamp to 0-7 (RGB values)

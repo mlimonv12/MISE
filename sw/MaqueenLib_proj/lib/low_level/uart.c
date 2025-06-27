@@ -115,9 +115,9 @@ uint8_t TxPacket(uint8_t bParameterLength, const uint8_t *buffer) {
     volatile uint8_t bytesSent;
     bytesSent = 0;
     _NOP();
-    while (bytesSent < bParameterLength) {
+    for (bytesSent = 0; bytesSent < bParameterLength; bytesSent++) {
         while (!TXD0_READY); // Wait for TX buffer to be ready
-        UCA0TXBUF = buffer[bytesSent++];
+        UCA0TXBUF = buffer[bytesSent];
         _NOP();
     }
 
