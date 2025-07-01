@@ -14,16 +14,17 @@
 
 #define Baud_rate 115200                        // symbols per second, 1 Symbol = 1 bit so UART transfer speed: 115,2kb/s
 typedef unsigned char byte;
-#define TXD0_READY (UCA0IFG&UCTXIFG)
-#define TXD0_BUSY  (UCA0STATW&UCBUSY)
+#define TXD0_READY (UCA0IFG & UCTXIFG)
+#define TXD0_BUSY  (UCA0STATW & UCBUSY)
 
 typedef struct wifi_info
 {
-    uint8_t id;                  // Identificador: 1 = Izquierda, 2 = Derecha, 0xFE = todos (Broadcast)
-    uint8_t len;              // Longitud de bytes del paquete (num de parametros + 2)
-    uint8_t instr;         // Instruccion: 2 = READ, 3 = WRITE (From comment, actual values are 0x19, 0x20)
-    uint8_t param[5];        // Instrucciones y/o parametros para comunicar
-    uint8_t chasum;           // Parametro para detectar posibles errores de comunicacion
+    uint8_t which;              // 1 = Left, 2 = Right, 0xFE = All
+    uint8_t len;                // Command length
+    uint8_t instr;              // W/R
+    uint8_t id;                 // Device identifier (LEDs, Motors, Buzzer)
+    uint8_t param[4];           // Misc. params
+    uint8_t chasum;             // Checksum
 } wifi_info;
 
 //Estructura de datos de respuesta a una recepci�n.
@@ -31,9 +32,9 @@ typedef struct RxReturn
 {
     uint8_t StatusPacket[RX_BUFFER_SIZE]; //Para almacenar la trama recibida
     uint8_t time_out;   //Indica si ha habido un problema de timeout durante la recepcion
-    uint16_t num_bytes;//El numero de bytes recibidos. Ojo: puede superar los 255 caracteres => tipo de 16 bits
-    //Se puede ampliar con mas campos si se considera oportuno.
-}RxReturn;
+    uint16_t num_bytes; //El numero de bytes recibidos. Ojo: puede superar los 255 caracteres => tipo de 16 bits
+
+} RxReturn;
 
 /*
 RxPacket() read data from UART buffer (received from Wifi module).

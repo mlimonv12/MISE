@@ -56,55 +56,56 @@ void wifi_control(void) {
         else
             update_LCD("Connected");
 
-        wifi_msg.id = wifi_rx.StatusPacket[2]; // Message ID
+        wifi_msg.which = wifi_rx.StatusPacket[2]; // Left, right or both?
         wifi_msg.len = wifi_rx.StatusPacket[3]; // Message len
         wifi_msg.instr = wifi_rx.StatusPacket[4]; // Received instr
+        wifi_msg.id = wifi_rx.StatusPacket[5]; // Device identifier
 
-        for (_i = 0; _i < (wifi_msg.len-2); _i++)
-            wifi_msg.param[_i] = wifi_rx.StatusPacket[_i+5];
+        for (_i = 0; _i < (wifi_msg.len-3); _i++)
+            wifi_msg.param[_i] = wifi_rx.StatusPacket[_i+6];
 
         wifi_msg.chasum = wifi_rx.StatusPacket[wifi_rx.num_bytes-1];
         __no_operation();
         
         // Process the received instr packet based on the command type
-        switch (wifi_msg.param[0]) {
+        switch (wifi_msg.id) {
             case LEDS:
-                switch (wifi_msg.id)
+                switch (wifi_msg.which)
                 {
                     case LED_LEFT:
-                        ledColor_left = wifi_msg.param[1];
+                        ledColor_left = wifi_msg.param[0];
                         break;
                     
                     case LED_RIGHT:
-                        ledColor_right = wifi_msg.param[1];
+                        ledColor_right = wifi_msg.param[0];
                         break;
 
                     default:
-                        ledColor_left = wifi_msg.param[1];
-                        ledColor_right = wifi_msg.param[1];
+                        ledColor_left = wifi_msg.param[0];
+                        ledColor_right = wifi_msg.param[0];
                         break;
                 }
                 break;
                 
             case MOTORS:
-                switch (wifi_msg.id)
+                switch (wifi_msg.which)
                 {
                     case MOTOR_LEFT:
-                        motors(wifi_msg.param[2], wifi_msg.param[1], 0, 0);
+                        motors(wifi_msg.param[1], wifi_msg.param[0], 0, 0);
                         break;
                     
                     case MOTOR_RIGHT:
-                        motors(0, 0, wifi_msg.param[2], wifi_msg.param[1]);
+                        motors(0, 0, wifi_msg.param[1], wifi_msg.param[0]);
                         break;
 
                     default: // Both motors
-                        motors(wifi_msg.param[2], wifi_msg.param[1], wifi_msg.param[2], wifi_msg.param[1]);
+                        motors(wifi_msg.param[1], wifi_msg.param[0], wifi_msg.param[1], wifi_msg.param[0]);
                         break;
                 }
                 break;
 
             case BUZZ_COM:
-                buzzer_on = wifi_msg.param[1];
+                buzzer_on = wifi_msg.param[0];
                 break;
 
             default:

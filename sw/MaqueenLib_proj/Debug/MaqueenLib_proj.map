@@ -1,10 +1,10 @@
 ******************************************************************************
                   MSP430 Linker PC v21.6.1                     
 ******************************************************************************
->> Linked Fri Jun 27 15:11:58 2025
+>> Linked Tue Jul  1 15:45:05 2025
 
 OUTPUT FILE NAME:   <MaqueenLib_proj.out>
-ENTRY POINT SYMBOL: "_c_int00_noargs_mpu"  address: 0000b4f0
+ENTRY POINT SYMBOL: "_c_int00_noargs_mpu"  address: 0000b4f8
 
 
 MEMORY CONFIGURATION
@@ -17,7 +17,7 @@ MEMORY CONFIGURATION
   TLVMEM                00001a00   00000200  00000000  00000200  RWIX
   BOOTCODE              00001c00   00000400  00000000  00000400  RWIX
   RAM                   00002000   00001000  00000379  00000c87  RWIX
-  FRAM                  00008000   00007f80  00003556  00004a2a  RWIX
+  FRAM                  00008000   00007f80  0000355e  00004a22  RWIX
   JTAGSIGNATURE         0000ff80   00000004  00000004  00000000  RWIX  ffff 
   BSLSIGNATURE          0000ff84   00000004  00000004  00000000  RWIX  ffff 
   BSLCONFIGURATIONSIGNA 0000ff88   00000002  00000002  00000000  RWIX  ffff 
@@ -133,7 +133,7 @@ section   page    origin      length       input sections
                   00008704    00000004     lcd_control.obj (.const:.string)
                   00008708    00000004     robot_menu.obj (.const:.string:speed_values)
 
-.text      0    0000870c    00002cd8     
+.text      0    0000870c    00002ce0     
                   0000870c    00000320     robot_menu.obj (.text:menu_click)
                   00008a2c    00000292     rts430x_lc_sd_eabi.lib : mpyd.c.obj (.text:__mspabi_mpyd)
                   00008cbe    00000228     AT.obj (.text:decodificar_trama)
@@ -142,118 +142,118 @@ section   page    origin      length       input sections
                   00009222    00000164     rts430x_lc_sd_eabi.lib : frcmpyd.c.obj (.text:__TI_frcmpyd)
                   00009386    0000013a     robot_menu.obj (.text:menu_update)
                   000094c0    00000132     AT.obj (.text:init_servidor_esp)
-                  000095f2    0000011a     wifi.obj (.text:wifi_control)
-                  0000970c    00000116     lcd_control.obj (.text:display_LCD)
-                  00009822    0000010e     rts430x_lc_sd_eabi.lib : _printfi.c.obj (.text:__TI_printfi_minimal:_setfield___TI_printfi_minimal)
-                  00009930    0000010c     robot_menu.obj (.text:menu_loop)
-                  00009a3c    00000100     robot_control.obj (.text:linetrack_motors)
-                  00009b3c    000000f4     main.obj (.text:main)
-                  00009c30    000000ee     rts430x_lc_sd_eabi.lib : copy_decompress_lzss.c.obj (.text:decompress:lzss:__TI_decompress_lzss)
-                  00009d1e    000000e2                            : _printfi.c.obj (.text:__TI_printfi_minimal:__TI_printfi_minimal)
-                  00009e00    000000c4                            : _printfi.c.obj (.text:__TI_printfi_minimal:_pproc_diouxp___TI_printfi_minimal)
-                  00009ec4    000000b8                            : fs_mpy.asm.obj (.text)
-                  00009f7c    000000a6     AT.obj (.text:esperar_configuracion)
-                  0000a022    0000009c     robot_menu.obj (.text:ldr_calibration_display)
-                  0000a0be    00000098     robot_menu.obj (.text:menu_back)
-                  0000a156    00000096     robot_control.obj (.text:linetrack)
-                  0000a1ec    0000008c     sensor_reading.obj (.text:read_LDRs)
-                  0000a278    0000008a     robot_menu.obj (.text:navigation_info_display)
-                  0000a302    00000080     rts430x_lc_sd_eabi.lib : fltuld.c.obj (.text:__mspabi_fltuld)
-                  0000a382    00000074     uart.obj (.text:RxPacket)
-                  0000a3f6    00000074     robot_menu.obj (.text:single_led_display)
-                  0000a46a    0000006e     wifi.obj (.text:wifi_init)
-                  0000a4d8    0000006c     robot_menu.obj (.text:toggle_all_leds)
-                  0000a544    0000006a     rts430x_lc_sd_eabi.lib : autoinit.c.obj (.text:__TI_auto_init_nobinit_nopinit_hold_wdt:__TI_auto_init_nobinit_nopinit_hold_wdt)
-                  0000a5ae    00000068     lcd_control.obj (.text:init_LCD)
-                  0000a616    00000066     rts430x_lc_sd_eabi.lib : fixdli.c.obj (.text:__mspabi_fixdli)
-                  0000a67c    00000066     gpio.obj (.text:init_GPIOs)
-                  0000a6e2    0000005c     rts430x_lc_sd_eabi.lib : mult64_f5hw.asm.obj (.text:__mpyll)
-                  0000a73e    0000005c     robot_control.obj (.text:control_joystick)
-                  0000a79a    0000005a     rts430x_lc_sd_eabi.lib : snprintf.c.obj (.text:snprintf)
-                  0000a7f4    00000058     robot_menu.obj (.text:about_display)
-                  0000a84c    00000052     rts430x_lc_sd_eabi.lib : atoi.c.obj (.text:atoi)
-                  0000a89e    0000004e     robot_control.obj (.text:escape_light)
-                  0000a8ec    0000004e     robot_control.obj (.text:follow_light)
-                  0000a93a    0000004c     timers.obj (.text:delay_ms)
-                  0000a986    0000004c     buzzer.obj (.text:pipip_car)
-                  0000a9d2    0000004a     AT.obj (.text:pinta_IP)
-                  0000aa1c    0000004a     rts430x_lc_sd_eabi.lib : fs_cmp.asm.obj (.text)
-                  0000aa66    00000044     robot_menu.obj (.text:network_display)
-                  0000aaaa    00000042     robot_menu.obj (.text:status_display)
-                  0000aaec    00000040     rts430x_lc_sd_eabi.lib : cpy_util.asm.obj (.text:__memcpy_far)
-                  0000ab2c    0000003e     AT.obj (.text:comando_ECHO)
-                  0000ab6a    0000003e     rts430x_lc_sd_eabi.lib : copy_zero_init.c.obj (.text:decompress:ZI:__TI_zero_init_nomemset:__TI_zero_init_nomemset)
-                  0000aba8    0000003e                            : lsl32.asm.obj (.text:l_lsl_const)
-                  0000abe6    0000003e                            : lsr32.asm.obj (.text:l_lsr_const)
-                  0000ac24    0000003e     AT.obj (.text:recibir_wifi)
-                  0000ac62    0000003c     FRWP_INIT_LIB_CCS_msp430_large_code_small_data.lib : frwp_init.obj (.text:__mpu_init)
-                  0000ac9e    0000003c     rts430x_lc_sd_eabi.lib : copy_decompress_none.c.obj (.text:decompress:none:__TI_decompress_none)
-                  0000acda    0000003a                            : lsl64.c.obj (.text:__mspabi_sllll)
-                  0000ad14    0000003a                            : lsr64.c.obj (.text:__mspabi_srlll)
-                  0000ad4e    0000003a     robot_menu.obj (.text:mode_display)
-                  0000ad88    0000003a     robot_menu.obj (.text:speed_display)
-                  0000adc2    00000038     i2c.obj (.text:I2C_receive)
-                  0000adfa    00000038     uart.obj (.text:init_uart_wifi)
-                  0000ae32    00000038     AT.obj (.text:pedir_mi_IP)
-                  0000ae6a    00000038     rts430x_lc_sd_eabi.lib : sprintf.c.obj (.text:sprintf)
-                  0000aea2    00000036     clocks.obj (.text:init_clocks)
-                  0000aed8    00000036     rts430x_lc_sd_eabi.lib : strstr.c.obj (.text:strstr)
-                  0000af0e    00000032                            : snprintf.c.obj (.text:_outs)
-                  0000af40    00000032     robot_control.obj (.text:fotodetectors)
-                  0000af72    00000030     uart.obj (.text:TxPacket)
-                  0000afa2    0000002e     robot_menu.obj (.text:calibrate_LDR)
-                  0000afd0    0000002c     rts430x_lc_sd_eabi.lib : mult3264_f5hw.asm.obj (.text:__mpyull)
-                  0000affc    0000002c     AT.obj (.text:comando_AT)
-                  0000b028    0000002c     i2c.obj (.text:init_i2c)
-                  0000b054    0000002c     robot_control.obj (.text:motors)
-                  0000b080    0000002c     rts430x_lc_sd_eabi.lib : strncpy.c.obj (.text:strncpy)
-                  0000b0ac    00000028     lcd_control.obj (.text:LCD_set_cursor)
-                  0000b0d4    00000028     rts430x_lc_sd_eabi.lib : fixdi.c.obj (.text:__mspabi_fixdi)
-                  0000b0fc    00000028     robot_menu.obj (.text:select_network)
-                  0000b124    00000026     i2c.obj (.text:I2C_send)
-                  0000b14a    00000026     AT.obj (.text:getConState)
-                  0000b170    00000026     robot_menu.obj (.text:init_menu)
-                  0000b196    00000026     timers.obj (.text:init_timers)
-                  0000b1bc    00000024     rts430x_lc_sd_eabi.lib : fs_utof.asm.obj (.text)
-                  0000b1e0    00000022     lcd_control.obj (.text:clear_LCD)
-                  0000b202    00000022     AT.obj (.text:getIP)
-                  0000b224    00000022     rts430x_lc_sd_eabi.lib : memccpy.c.obj (.text:memccpy)
-                  0000b246    00000022     robot_control.obj (.text:robot_LEDs)
-                  0000b268    0000001e     rts430x_lc_sd_eabi.lib : snprintf.c.obj (.text:_outc)
-                  0000b286    0000001a     adc.obj (.text:init_adc)
-                  0000b2a0    0000001a     uart.obj (.text:init_timeout)
-                  0000b2ba    00000018     rts430x_lc_sd_eabi.lib : sprintf.c.obj (.text:_outs)
-                  0000b2d2    00000018                            : mult16_f5hw.asm.obj (.text)
-                  0000b2ea    00000016     uart.obj (.text:TimeOut)
-                  0000b300    00000016     rts430x_lc_sd_eabi.lib : div16u.asm.obj (.text)
-                  0000b316    00000014                            : memset.c.obj (.text:memset)
-                  0000b32a    00000012                            : sprintf.c.obj (.text:_outc)
-                  0000b33c    00000012                            : memcpy.c.obj (.text:memcpy)
-                  0000b34e    00000012     buzzer.obj (.text:sound_buzzer)
-                  0000b360    00000012     lcd_control.obj (.text:update_LCD)
-                  0000b372    00000010     rts430x_lc_sd_eabi.lib : lsr32.asm.obj (.text:l_lsr)
-                  0000b382    00000010     robot_menu.obj (.text:set_single_led_color)
-                  0000b392    00000010     rts430x_lc_sd_eabi.lib : strcpy.c.obj (.text:strcpy)
-                  0000b3a2    0000000e     robot_menu.obj (.text:set_robot_speed)
-                  0000b3b0    0000000e     rts430x_lc_sd_eabi.lib : strlen.c.obj (.text:strlen)
-                  0000b3be    0000000c     uart.obj (.text:stop_timeout)
-                  0000b3ca    00000008     uart.obj (.text:reset_timeout)
-                  0000b3d2    00000006     rts430x_lc_sd_eabi.lib : fltud.c.obj (.text:__mspabi_fltud)
-                  0000b3d8    00000006                            : exit.c.obj (.text:abort)
-                  0000b3de    00000004                            : pre_init.c.obj (.text:_system_pre_init)
-                  0000b3e2    00000002                            : startup.c.obj (.text:_system_post_cinit)
+                  000095f2    00000122     wifi.obj (.text:wifi_control)
+                  00009714    00000116     lcd_control.obj (.text:display_LCD)
+                  0000982a    0000010e     rts430x_lc_sd_eabi.lib : _printfi.c.obj (.text:__TI_printfi_minimal:_setfield___TI_printfi_minimal)
+                  00009938    0000010c     robot_menu.obj (.text:menu_loop)
+                  00009a44    00000100     robot_control.obj (.text:linetrack_motors)
+                  00009b44    000000f4     main.obj (.text:main)
+                  00009c38    000000ee     rts430x_lc_sd_eabi.lib : copy_decompress_lzss.c.obj (.text:decompress:lzss:__TI_decompress_lzss)
+                  00009d26    000000e2                            : _printfi.c.obj (.text:__TI_printfi_minimal:__TI_printfi_minimal)
+                  00009e08    000000c4                            : _printfi.c.obj (.text:__TI_printfi_minimal:_pproc_diouxp___TI_printfi_minimal)
+                  00009ecc    000000b8                            : fs_mpy.asm.obj (.text)
+                  00009f84    000000a6     AT.obj (.text:esperar_configuracion)
+                  0000a02a    0000009c     robot_menu.obj (.text:ldr_calibration_display)
+                  0000a0c6    00000098     robot_menu.obj (.text:menu_back)
+                  0000a15e    00000096     robot_control.obj (.text:linetrack)
+                  0000a1f4    0000008c     sensor_reading.obj (.text:read_LDRs)
+                  0000a280    0000008a     robot_menu.obj (.text:navigation_info_display)
+                  0000a30a    00000080     rts430x_lc_sd_eabi.lib : fltuld.c.obj (.text:__mspabi_fltuld)
+                  0000a38a    00000074     uart.obj (.text:RxPacket)
+                  0000a3fe    00000074     robot_menu.obj (.text:single_led_display)
+                  0000a472    0000006e     wifi.obj (.text:wifi_init)
+                  0000a4e0    0000006c     robot_menu.obj (.text:toggle_all_leds)
+                  0000a54c    0000006a     rts430x_lc_sd_eabi.lib : autoinit.c.obj (.text:__TI_auto_init_nobinit_nopinit_hold_wdt:__TI_auto_init_nobinit_nopinit_hold_wdt)
+                  0000a5b6    00000068     lcd_control.obj (.text:init_LCD)
+                  0000a61e    00000066     rts430x_lc_sd_eabi.lib : fixdli.c.obj (.text:__mspabi_fixdli)
+                  0000a684    00000066     gpio.obj (.text:init_GPIOs)
+                  0000a6ea    0000005c     rts430x_lc_sd_eabi.lib : mult64_f5hw.asm.obj (.text:__mpyll)
+                  0000a746    0000005c     robot_control.obj (.text:control_joystick)
+                  0000a7a2    0000005a     rts430x_lc_sd_eabi.lib : snprintf.c.obj (.text:snprintf)
+                  0000a7fc    00000058     robot_menu.obj (.text:about_display)
+                  0000a854    00000052     rts430x_lc_sd_eabi.lib : atoi.c.obj (.text:atoi)
+                  0000a8a6    0000004e     robot_control.obj (.text:escape_light)
+                  0000a8f4    0000004e     robot_control.obj (.text:follow_light)
+                  0000a942    0000004c     timers.obj (.text:delay_ms)
+                  0000a98e    0000004c     buzzer.obj (.text:pipip_car)
+                  0000a9da    0000004a     AT.obj (.text:pinta_IP)
+                  0000aa24    0000004a     rts430x_lc_sd_eabi.lib : fs_cmp.asm.obj (.text)
+                  0000aa6e    00000044     robot_menu.obj (.text:network_display)
+                  0000aab2    00000042     robot_menu.obj (.text:status_display)
+                  0000aaf4    00000040     rts430x_lc_sd_eabi.lib : cpy_util.asm.obj (.text:__memcpy_far)
+                  0000ab34    0000003e     AT.obj (.text:comando_ECHO)
+                  0000ab72    0000003e     rts430x_lc_sd_eabi.lib : copy_zero_init.c.obj (.text:decompress:ZI:__TI_zero_init_nomemset:__TI_zero_init_nomemset)
+                  0000abb0    0000003e                            : lsl32.asm.obj (.text:l_lsl_const)
+                  0000abee    0000003e                            : lsr32.asm.obj (.text:l_lsr_const)
+                  0000ac2c    0000003e     AT.obj (.text:recibir_wifi)
+                  0000ac6a    0000003c     FRWP_INIT_LIB_CCS_msp430_large_code_small_data.lib : frwp_init.obj (.text:__mpu_init)
+                  0000aca6    0000003c     rts430x_lc_sd_eabi.lib : copy_decompress_none.c.obj (.text:decompress:none:__TI_decompress_none)
+                  0000ace2    0000003a                            : lsl64.c.obj (.text:__mspabi_sllll)
+                  0000ad1c    0000003a                            : lsr64.c.obj (.text:__mspabi_srlll)
+                  0000ad56    0000003a     robot_menu.obj (.text:mode_display)
+                  0000ad90    0000003a     robot_menu.obj (.text:speed_display)
+                  0000adca    00000038     i2c.obj (.text:I2C_receive)
+                  0000ae02    00000038     uart.obj (.text:init_uart_wifi)
+                  0000ae3a    00000038     AT.obj (.text:pedir_mi_IP)
+                  0000ae72    00000038     rts430x_lc_sd_eabi.lib : sprintf.c.obj (.text:sprintf)
+                  0000aeaa    00000036     clocks.obj (.text:init_clocks)
+                  0000aee0    00000036     rts430x_lc_sd_eabi.lib : strstr.c.obj (.text:strstr)
+                  0000af16    00000032                            : snprintf.c.obj (.text:_outs)
+                  0000af48    00000032     robot_control.obj (.text:fotodetectors)
+                  0000af7a    00000030     uart.obj (.text:TxPacket)
+                  0000afaa    0000002e     robot_menu.obj (.text:calibrate_LDR)
+                  0000afd8    0000002c     rts430x_lc_sd_eabi.lib : mult3264_f5hw.asm.obj (.text:__mpyull)
+                  0000b004    0000002c     AT.obj (.text:comando_AT)
+                  0000b030    0000002c     i2c.obj (.text:init_i2c)
+                  0000b05c    0000002c     robot_control.obj (.text:motors)
+                  0000b088    0000002c     rts430x_lc_sd_eabi.lib : strncpy.c.obj (.text:strncpy)
+                  0000b0b4    00000028     lcd_control.obj (.text:LCD_set_cursor)
+                  0000b0dc    00000028     rts430x_lc_sd_eabi.lib : fixdi.c.obj (.text:__mspabi_fixdi)
+                  0000b104    00000028     robot_menu.obj (.text:select_network)
+                  0000b12c    00000026     i2c.obj (.text:I2C_send)
+                  0000b152    00000026     AT.obj (.text:getConState)
+                  0000b178    00000026     robot_menu.obj (.text:init_menu)
+                  0000b19e    00000026     timers.obj (.text:init_timers)
+                  0000b1c4    00000024     rts430x_lc_sd_eabi.lib : fs_utof.asm.obj (.text)
+                  0000b1e8    00000022     lcd_control.obj (.text:clear_LCD)
+                  0000b20a    00000022     AT.obj (.text:getIP)
+                  0000b22c    00000022     rts430x_lc_sd_eabi.lib : memccpy.c.obj (.text:memccpy)
+                  0000b24e    00000022     robot_control.obj (.text:robot_LEDs)
+                  0000b270    0000001e     rts430x_lc_sd_eabi.lib : snprintf.c.obj (.text:_outc)
+                  0000b28e    0000001a     adc.obj (.text:init_adc)
+                  0000b2a8    0000001a     uart.obj (.text:init_timeout)
+                  0000b2c2    00000018     rts430x_lc_sd_eabi.lib : sprintf.c.obj (.text:_outs)
+                  0000b2da    00000018                            : mult16_f5hw.asm.obj (.text)
+                  0000b2f2    00000016     uart.obj (.text:TimeOut)
+                  0000b308    00000016     rts430x_lc_sd_eabi.lib : div16u.asm.obj (.text)
+                  0000b31e    00000014                            : memset.c.obj (.text:memset)
+                  0000b332    00000012                            : sprintf.c.obj (.text:_outc)
+                  0000b344    00000012                            : memcpy.c.obj (.text:memcpy)
+                  0000b356    00000012     buzzer.obj (.text:sound_buzzer)
+                  0000b368    00000012     lcd_control.obj (.text:update_LCD)
+                  0000b37a    00000010     rts430x_lc_sd_eabi.lib : lsr32.asm.obj (.text:l_lsr)
+                  0000b38a    00000010     robot_menu.obj (.text:set_single_led_color)
+                  0000b39a    00000010     rts430x_lc_sd_eabi.lib : strcpy.c.obj (.text:strcpy)
+                  0000b3aa    0000000e     robot_menu.obj (.text:set_robot_speed)
+                  0000b3b8    0000000e     rts430x_lc_sd_eabi.lib : strlen.c.obj (.text:strlen)
+                  0000b3c6    0000000c     uart.obj (.text:stop_timeout)
+                  0000b3d2    00000008     uart.obj (.text:reset_timeout)
+                  0000b3da    00000006     rts430x_lc_sd_eabi.lib : fltud.c.obj (.text:__mspabi_fltud)
+                  0000b3e0    00000006                            : exit.c.obj (.text:abort)
+                  0000b3e6    00000004                            : pre_init.c.obj (.text:_system_pre_init)
+                  0000b3ea    00000002                            : startup.c.obj (.text:_system_post_cinit)
 
 .text:_isr 
-*          0    0000b3e4    00000172     
-                  0000b3e4    0000008e     i2c.obj (.text:_isr:ISR_USCI_I2C)
-                  0000b472    0000005a     gpio.obj (.text:_isr:readjoystick)
-                  0000b4cc    00000024     uart.obj (.text:_isr:EUSCIA0_IRQHandler)
-                  0000b4f0    00000020     rts430x_lc_sd_eabi.lib : boot.c.obj (.text:_isr:_c_int00_noargs_mpu)
-                  0000b510    00000018     adc.obj (.text:_isr:ADC_ISR)
-                  0000b528    0000000e     timers.obj (.text:_isr:timerB0_0_isr)
-                  0000b536    0000000e     uart.obj (.text:_isr:timerB1_0_isr)
-                  0000b544    0000000a     buzzer.obj (.text:_isr:timerB2_buzzer_ISR)
-                  0000b54e    00000008     rts430x_lc_sd_eabi.lib : isr_trap.asm.obj (.text:_isr:__TI_ISR_TRAP)
+*          0    0000b3ec    00000172     
+                  0000b3ec    0000008e     i2c.obj (.text:_isr:ISR_USCI_I2C)
+                  0000b47a    0000005a     gpio.obj (.text:_isr:readjoystick)
+                  0000b4d4    00000024     uart.obj (.text:_isr:EUSCIA0_IRQHandler)
+                  0000b4f8    00000020     rts430x_lc_sd_eabi.lib : boot.c.obj (.text:_isr:_c_int00_noargs_mpu)
+                  0000b518    00000018     adc.obj (.text:_isr:ADC_ISR)
+                  0000b530    0000000e     timers.obj (.text:_isr:timerB0_0_isr)
+                  0000b53e    0000000e     uart.obj (.text:_isr:timerB1_0_isr)
+                  0000b54c    0000000a     buzzer.obj (.text:_isr:timerB2_buzzer_ISR)
+                  0000b556    00000008     rts430x_lc_sd_eabi.lib : isr_trap.asm.obj (.text:_isr:__TI_ISR_TRAP)
 
 .bss       0    00002000    0000021d     UNINITIALIZED
                   00002000    00000204     (.common:wifi_rx)
@@ -427,12 +427,12 @@ MODULE SUMMARY
     .\lib\top_level\
        robot_menu.obj               2544    904       135    
        robot_control.obj            1610    0         19     
-       wifi.obj                     392     76        527    
+       wifi.obj                     400     76        527    
        lcd_control.obj              474     4         0      
        sensor_reading.obj           140     0         1      
        buzzer.obj                   104     2         0      
     +--+----------------------------+-------+---------+---------+
-       Total:                       5264    986       682    
+       Total:                       5272    986       682    
                                                              
     C:\ti\ccs1281\ccs\ccs_base\msp430\lib\FR2xx\FRWP_INIT_LIB_CCS_msp430_large_code_small_data.lib
        frwp_init.obj                60      0         0      
@@ -502,7 +502,7 @@ MODULE SUMMARY
        Stack:                       0       0         160    
        Linker Generated:            0       228       0      
     +--+----------------------------+-------+---------+---------+
-       Grand Total:                 11850   1845      885    
+       Grand Total:                 11858   1845      885    
 
 
 LINKER GENERATED COPY TABLES
@@ -554,7 +554,7 @@ address   name
 00000712  ADCMEM0                                
 00000713  ADCMEM0_H                              
 00000712  ADCMEM0_L                              
-0000b510  ADC_ISR                                
+0000b518  ADC_ISR                                
 000022d6  ADC_value                              
 00000660  BAKMEM0                                
 00000661  BAKMEM0_H                              
@@ -605,7 +605,7 @@ address   name
 00000673  BAKMEM9_H                              
 00000672  BAKMEM9_L                              
 0000220d  Byte_Recibido                          
-0000b3d8  C$$EXIT                                
+0000b3e0  C$$EXIT                                
 000002ee  CAPTIOCTL                              
 000002ef  CAPTIOCTL_H                            
 000002ee  CAPTIOCTL_L                            
@@ -685,7 +685,7 @@ address   name
 00000191  CSCTL8_H                               
 00000190  CSCTL8_L                               
 0000221a  DatoLeido_UART                         
-0000b4cc  EUSCIA0_IRQHandler                     
+0000b4d4  EUSCIA0_IRQHandler                     
 000001a0  FRCTL0                                 
 000001a1  FRCTL0_H                               
 000001a0  FRCTL0_L                               
@@ -695,8 +695,8 @@ address   name
 000001a6  GCCTL1                                 
 000001a7  GCCTL1_H                               
 000001a6  GCCTL1_L                               
-0000adc2  I2C_receive                            
-0000b124  I2C_send                               
+0000adca  I2C_receive                            
+0000b12c  I2C_send                               
 000006c4  ICCILSR0                               
 000006c5  ICCILSR0_H                             
 000006c4  ICCILSR0_L                             
@@ -715,8 +715,8 @@ address   name
 000006c0  ICCSC                                  
 000006c1  ICCSC_H                                
 000006c0  ICCSC_L                                
-0000b3e4  ISR_USCI_I2C                           
-0000b0ac  LCD_set_cursor                         
+0000b3ec  ISR_USCI_I2C                           
+0000b0b4  LCD_set_cursor                         
 000004c4  MAC                                    
 000004da  MAC32H                                 
 000004db  MAC32H_H                               
@@ -1000,7 +1000,7 @@ address   name
 00000309  RTCMOD_H                               
 00000308  RTCMOD_L                               
 0000221b  RXByteCtr                              
-0000a382  RxPacket                               
+0000a38a  RxPacket                               
 00000c84  SAC0DAC                                
 00000c88  SAC0DACSTS                             
 00000c89  SAC0DACSTS_H                           
@@ -1269,8 +1269,8 @@ address   name
 00000451  TB3R_H                                 
 00000450  TB3R_L                                 
 0000221c  TXByteCtr                              
-0000b2ea  TimeOut                                
-0000af72  TxPacket                               
+0000b2f2  TimeOut                                
+0000af7a  TxPacket                               
 00000510  UCA0ABCTL                              
 00000511  UCA0ABCTL_H                            
 00000510  UCA0ABCTL_L                            
@@ -1456,10 +1456,10 @@ address   name
 000080e6  __TI_CINIT_Warm                        
 000080c4  __TI_Handler_Table_Base                
 000080d0  __TI_Handler_Table_Limit               
-0000b54e  __TI_ISR_TRAP                          
-0000a544  __TI_auto_init_nobinit_nopinit_hold_wdt
-00009c30  __TI_decompress_lzss                   
-0000ac9e  __TI_decompress_none                   
+0000b556  __TI_ISR_TRAP                          
+0000a54c  __TI_auto_init_nobinit_nopinit_hold_wdt
+00009c38  __TI_decompress_lzss                   
+0000aca6  __TI_decompress_none                   
 00009222  __TI_frcmpyd                           
 0000ffce  __TI_int22                             
 0000ffd0  __TI_int23                             
@@ -1486,120 +1486,120 @@ address   name
 0000fffa  __TI_int44                             
 0000fffc  __TI_int45                             
 ffffffff  __TI_pprof_out_hndl                    
-00009d1e  __TI_printfi_minimal                   
+00009d26  __TI_printfi_minimal                   
 ffffffff  __TI_prof_data_size                    
 ffffffff  __TI_prof_data_start                   
-0000ab6a  __TI_zero_init_nomemset                
+0000ab72  __TI_zero_init_nomemset                
 ffffffff  __c_args__                             
-0000aaec  __memcpy_far                           
+0000aaf4  __memcpy_far                           
 00000001  __mpu_enable                           
-0000ac62  __mpu_init                             
-0000aa1c  __mspabi_cmpf                          
-0000b300  __mspabi_divu                          
-0000b0d4  __mspabi_fixdi                         
-0000a616  __mspabi_fixdli                        
-0000b3d2  __mspabi_fltud                         
-0000b1bc  __mspabi_fltuf                         
-0000a302  __mspabi_fltuld                        
+0000ac6a  __mpu_init                             
+0000aa24  __mspabi_cmpf                          
+0000b308  __mspabi_divu                          
+0000b0dc  __mspabi_fixdi                         
+0000a61e  __mspabi_fixdli                        
+0000b3da  __mspabi_fltud                         
+0000b1c4  __mspabi_fltuf                         
+0000a30a  __mspabi_fltuld                        
 00008a2c  __mspabi_mpyd                          
-00009ec4  __mspabi_mpyf                          
-0000b2d2  __mspabi_mpyi_f5hw                     
-0000a6e2  __mspabi_mpyll_f5hw                    
-0000afd0  __mspabi_mpyull_f5hw                   
-0000b300  __mspabi_remu                          
-0000abe0  __mspabi_slll_1                        
-0000abbc  __mspabi_slll_10                       
-0000abb8  __mspabi_slll_11                       
-0000abb4  __mspabi_slll_12                       
-0000abb0  __mspabi_slll_13                       
-0000abac  __mspabi_slll_14                       
-0000aba8  __mspabi_slll_15                       
-0000abdc  __mspabi_slll_2                        
-0000abd8  __mspabi_slll_3                        
-0000abd4  __mspabi_slll_4                        
-0000abd0  __mspabi_slll_5                        
-0000abcc  __mspabi_slll_6                        
-0000abc8  __mspabi_slll_7                        
-0000abc4  __mspabi_slll_8                        
-0000abc0  __mspabi_slll_9                        
-0000acda  __mspabi_sllll                         
-0000b372  __mspabi_srll                          
-0000ac1e  __mspabi_srll_1                        
-0000abfa  __mspabi_srll_10                       
-0000abf6  __mspabi_srll_11                       
-0000abf2  __mspabi_srll_12                       
-0000abee  __mspabi_srll_13                       
-0000abea  __mspabi_srll_14                       
-0000abe6  __mspabi_srll_15                       
-0000ac1a  __mspabi_srll_2                        
-0000ac16  __mspabi_srll_3                        
-0000ac12  __mspabi_srll_4                        
-0000ac0e  __mspabi_srll_5                        
-0000ac0a  __mspabi_srll_6                        
-0000ac06  __mspabi_srll_7                        
-0000ac02  __mspabi_srll_8                        
-0000abfe  __mspabi_srll_9                        
-0000ad14  __mspabi_srlll                         
-0000b4f0  _c_int00_noargs_mpu                    
+00009ecc  __mspabi_mpyf                          
+0000b2da  __mspabi_mpyi_f5hw                     
+0000a6ea  __mspabi_mpyll_f5hw                    
+0000afd8  __mspabi_mpyull_f5hw                   
+0000b308  __mspabi_remu                          
+0000abe8  __mspabi_slll_1                        
+0000abc4  __mspabi_slll_10                       
+0000abc0  __mspabi_slll_11                       
+0000abbc  __mspabi_slll_12                       
+0000abb8  __mspabi_slll_13                       
+0000abb4  __mspabi_slll_14                       
+0000abb0  __mspabi_slll_15                       
+0000abe4  __mspabi_slll_2                        
+0000abe0  __mspabi_slll_3                        
+0000abdc  __mspabi_slll_4                        
+0000abd8  __mspabi_slll_5                        
+0000abd4  __mspabi_slll_6                        
+0000abd0  __mspabi_slll_7                        
+0000abcc  __mspabi_slll_8                        
+0000abc8  __mspabi_slll_9                        
+0000ace2  __mspabi_sllll                         
+0000b37a  __mspabi_srll                          
+0000ac26  __mspabi_srll_1                        
+0000ac02  __mspabi_srll_10                       
+0000abfe  __mspabi_srll_11                       
+0000abfa  __mspabi_srll_12                       
+0000abf6  __mspabi_srll_13                       
+0000abf2  __mspabi_srll_14                       
+0000abee  __mspabi_srll_15                       
+0000ac22  __mspabi_srll_2                        
+0000ac1e  __mspabi_srll_3                        
+0000ac1a  __mspabi_srll_4                        
+0000ac16  __mspabi_srll_5                        
+0000ac12  __mspabi_srll_6                        
+0000ac0e  __mspabi_srll_7                        
+0000ac0a  __mspabi_srll_8                        
+0000ac06  __mspabi_srll_9                        
+0000ad1c  __mspabi_srlll                         
+0000b4f8  _c_int00_noargs_mpu                    
 0000846a  _ctypes_                               
 000022d8  _i                                     
 0000fffe  _reset_vector                          
 00002f60  _stack                                 
-0000b3e2  _system_post_cinit                     
-0000b3de  _system_pre_init                       
-0000b3d8  abort                                  
-0000a7f4  about_display                          
+0000b3ea  _system_post_cinit                     
+0000b3e6  _system_pre_init                       
+0000b3e0  abort                                  
+0000a7fc  about_display                          
 000022b6  about_items                            
 0000224d  active                                 
-0000a84c  atoi                                   
+0000a854  atoi                                   
 000022d9  buzzer_on                              
-0000afa2  calibrate_LDR                          
+0000afaa  calibrate_LDR                          
 000022ba  calibrate_ldrs_menu_items              
-0000b1e0  clear_LCD                              
+0000b1e8  clear_LCD                              
 0000225a  color_Names                            
-0000affc  comando_AT                             
-0000ab2c  comando_ECHO                           
+0000b004  comando_AT                             
+0000ab34  comando_ECHO                           
 000086b2  conectar_AP                            
 0000221e  conexion                               
-0000a73e  control_joystick                       
+0000a746  control_joystick                       
 000022ce  count                                  
 000086c0  crear_AP                               
 00002258  current_menu_length                    
 00008cbe  decodificar_trama                      
-0000a93a  delay_ms                               
-0000970c  display_LCD                            
+0000a942  delay_ms                               
+00009714  display_LCD                            
 000086e8  echo_OFF                               
 000086f0  echo_ON                                
-0000a89e  escape_light                           
+0000a8a6  escape_light                           
 00008ee6  escape_motors                          
-00009f7c  esperar_configuracion                  
+00009f84  esperar_configuracion                  
 000086a2  estado_conexiones                      
-0000a8ec  follow_light                           
+0000a8f4  follow_light                           
 00009084  follow_motors                          
-0000af40  fotodetectors                          
+0000af48  fotodetectors                          
 00008000  fram_rw_start                          
 00008000  fram_rx_start                          
-0000b14a  getConState                            
-0000b202  getIP                                  
+0000b152  getConState                            
+0000b20a  getIP                                  
 0000229c  i                                      
 00002249  inMovement                             
 00000001  info_fram_protection                   
-0000a67c  init_GPIOs                             
-0000a5ae  init_LCD                               
-0000b286  init_adc                               
-0000aea2  init_clocks                            
-0000b028  init_i2c                               
-0000b170  init_menu                              
+0000a684  init_GPIOs                             
+0000a5b6  init_LCD                               
+0000b28e  init_adc                               
+0000aeaa  init_clocks                            
+0000b030  init_i2c                               
+0000b178  init_menu                              
 000094c0  init_servidor_esp                      
-0000b2a0  init_timeout                           
-0000b196  init_timers                            
-0000adfa  init_uart_wifi                         
+0000b2a8  init_timeout                           
+0000b19e  init_timers                            
+0000ae02  init_uart_wifi                         
 000022ab  joystick_down_pressed                  
 000022ad  joystick_left_pressed                  
 000022ae  joystick_right_pressed                 
 000022ac  joystick_select_pressed                
 000022aa  joystick_up_pressed                    
-0000a022  ldr_calibration_display                
+0000a02a  ldr_calibration_display                
 00002298  ldr_scale                              
 0000220e  ldr_vals                               
 00002251  ledColor_left                          
@@ -1607,81 +1607,81 @@ ffffffff  __c_args__
 000022be  led_colors_menu_items                  
 0000224a  ledsOn                                 
 00002296  leds_state                             
-0000a156  linetrack                              
-00009a3c  linetrack_motors                       
+0000a15e  linetrack                              
+00009a44  linetrack_motors                       
 000086dc  local_IP                               
-00009b3c  main                                   
+00009b44  main                                   
 0000226a  main_menu_items                        
 000022c2  max_light                              
-0000b224  memccpy                                
-0000b33c  memcpy                                 
-0000b316  memset                                 
+0000b22c  memccpy                                
+0000b344  memcpy                                 
+0000b31e  memset                                 
 00002256  menuContent                            
 00002247  menuIndex                              
-0000a0be  menu_back                              
+0000a0c6  menu_back                              
 0000870c  menu_click                             
-00009930  menu_loop                              
+00009938  menu_loop                              
 00009386  menu_update                            
 000022c6  min_light                              
 0000224c  mode                                   
-0000ad4e  mode_display                           
+0000ad56  mode_display                           
 00002274  mode_names                             
 0000867e  modo_AP                                
 00008690  modo_Cliente                           
 000086ce  modo_multi                             
 0000866a  modo_servidor                          
-0000b054  motors                                 
+0000b05c  motors                                 
 00002212  motors_next                            
 000022ca  motors_prev                            
-0000a278  navigation_info_display                
-0000aa66  network_display                        
-0000ae32  pedir_mi_IP                            
-0000a9d2  pinta_IP                               
-0000a986  pipip_car                              
+0000a280  navigation_info_display                
+0000aa6e  network_display                        
+0000ae3a  pedir_mi_IP                            
+0000a9da  pinta_IP                               
+0000a98e  pipip_car                              
 00000001  program_fram_protection                
 0000229e  pwd_list                               
 00002232  pwd_sta                                
-0000a1ec  read_LDRs                              
-0000b472  readjoystick                           
-0000ac24  recibir_wifi                           
-0000b3ca  reset_timeout                          
-0000b246  robot_LEDs                             
+0000a1f4  read_LDRs                              
+0000b47a  readjoystick                           
+0000ac2c  recibir_wifi                           
+0000b3d2  reset_timeout                          
+0000b24e  robot_LEDs                             
 00002245  samples                                
-0000b0fc  select_network                         
-0000b3a2  set_robot_speed                        
-0000b382  set_single_led_color                   
+0000b104  select_network                         
+0000b3aa  set_robot_speed                        
+0000b38a  set_single_led_color                   
 00002252  settingRightLed                        
 0000227e  settings_menu_items                    
-0000a3f6  single_led_display                     
-0000a79a  snprintf                               
-0000b34e  sound_buzzer                           
+0000a3fe  single_led_display                     
+0000a7a2  snprintf                               
+0000b356  sound_buzzer                           
 0000224f  speed                                  
-0000ad88  speed_display                          
+0000ad90  speed_display                          
 0000224e  speed_i                                
 00002286  speed_menu_items                       
 0000228e  speed_names                            
 00008708  speed_values                           
-0000ae6a  sprintf                                
+0000ae72  sprintf                                
 000022a4  ssid_list                              
 000022b0  ssid_sta                               
 00000000  start_protection_offset_address        
-0000aaaa  status_display                         
-0000b3be  stop_timeout                           
-0000b392  strcpy                                 
-0000b3b0  strlen                                 
-0000b080  strncpy                                
-0000aed8  strstr                                 
+0000aab2  status_display                         
+0000b3c6  stop_timeout                           
+0000b39a  strcpy                                 
+0000b3b8  strlen                                 
+0000b088  strncpy                                
+0000aee0  strstr                                 
 000086fe  test                                   
-0000b528  timerB0_0_isr                          
-0000b536  timerB1_0_isr                          
-0000b544  timerB2_buzzer_ISR                     
+0000b530  timerB0_0_isr                          
+0000b53e  timerB1_0_isr                          
+0000b54c  timerB2_buzzer_ISR                     
 000022d2  timer_ticks                            
-0000a4d8  toggle_all_leds                        
+0000a4e0  toggle_all_leds                        
 00002248  topIndex                               
-0000b360  update_LCD                             
+0000b368  update_LCD                             
 00002246  visibleMenu                            
 000095f2  wifi_control                           
-0000a46a  wifi_init                              
+0000a472  wifi_init                              
 00002204  wifi_msg                               
 00002000  wifi_rx                                
 0000224b  wifi_started                           
@@ -2691,138 +2691,138 @@ address   name
 00009386  menu_update                            
 000094c0  init_servidor_esp                      
 000095f2  wifi_control                           
-0000970c  display_LCD                            
-00009930  menu_loop                              
-00009a3c  linetrack_motors                       
-00009b3c  main                                   
-00009c30  __TI_decompress_lzss                   
-00009d1e  __TI_printfi_minimal                   
-00009ec4  __mspabi_mpyf                          
-00009f7c  esperar_configuracion                  
-0000a022  ldr_calibration_display                
-0000a0be  menu_back                              
-0000a156  linetrack                              
-0000a1ec  read_LDRs                              
-0000a278  navigation_info_display                
-0000a302  __mspabi_fltuld                        
-0000a382  RxPacket                               
-0000a3f6  single_led_display                     
-0000a46a  wifi_init                              
-0000a4d8  toggle_all_leds                        
-0000a544  __TI_auto_init_nobinit_nopinit_hold_wdt
-0000a5ae  init_LCD                               
-0000a616  __mspabi_fixdli                        
-0000a67c  init_GPIOs                             
-0000a6e2  __mspabi_mpyll_f5hw                    
-0000a73e  control_joystick                       
-0000a79a  snprintf                               
-0000a7f4  about_display                          
-0000a84c  atoi                                   
-0000a89e  escape_light                           
-0000a8ec  follow_light                           
-0000a93a  delay_ms                               
-0000a986  pipip_car                              
-0000a9d2  pinta_IP                               
-0000aa1c  __mspabi_cmpf                          
-0000aa66  network_display                        
-0000aaaa  status_display                         
-0000aaec  __memcpy_far                           
-0000ab2c  comando_ECHO                           
-0000ab6a  __TI_zero_init_nomemset                
-0000aba8  __mspabi_slll_15                       
-0000abac  __mspabi_slll_14                       
-0000abb0  __mspabi_slll_13                       
-0000abb4  __mspabi_slll_12                       
-0000abb8  __mspabi_slll_11                       
-0000abbc  __mspabi_slll_10                       
-0000abc0  __mspabi_slll_9                        
-0000abc4  __mspabi_slll_8                        
-0000abc8  __mspabi_slll_7                        
-0000abcc  __mspabi_slll_6                        
-0000abd0  __mspabi_slll_5                        
-0000abd4  __mspabi_slll_4                        
-0000abd8  __mspabi_slll_3                        
-0000abdc  __mspabi_slll_2                        
-0000abe0  __mspabi_slll_1                        
-0000abe6  __mspabi_srll_15                       
-0000abea  __mspabi_srll_14                       
-0000abee  __mspabi_srll_13                       
-0000abf2  __mspabi_srll_12                       
-0000abf6  __mspabi_srll_11                       
-0000abfa  __mspabi_srll_10                       
-0000abfe  __mspabi_srll_9                        
-0000ac02  __mspabi_srll_8                        
-0000ac06  __mspabi_srll_7                        
-0000ac0a  __mspabi_srll_6                        
-0000ac0e  __mspabi_srll_5                        
-0000ac12  __mspabi_srll_4                        
-0000ac16  __mspabi_srll_3                        
-0000ac1a  __mspabi_srll_2                        
-0000ac1e  __mspabi_srll_1                        
-0000ac24  recibir_wifi                           
-0000ac62  __mpu_init                             
-0000ac9e  __TI_decompress_none                   
-0000acda  __mspabi_sllll                         
-0000ad14  __mspabi_srlll                         
-0000ad4e  mode_display                           
-0000ad88  speed_display                          
-0000adc2  I2C_receive                            
-0000adfa  init_uart_wifi                         
-0000ae32  pedir_mi_IP                            
-0000ae6a  sprintf                                
-0000aea2  init_clocks                            
-0000aed8  strstr                                 
-0000af40  fotodetectors                          
-0000af72  TxPacket                               
-0000afa2  calibrate_LDR                          
-0000afd0  __mspabi_mpyull_f5hw                   
-0000affc  comando_AT                             
-0000b028  init_i2c                               
-0000b054  motors                                 
-0000b080  strncpy                                
-0000b0ac  LCD_set_cursor                         
-0000b0d4  __mspabi_fixdi                         
-0000b0fc  select_network                         
-0000b124  I2C_send                               
-0000b14a  getConState                            
-0000b170  init_menu                              
-0000b196  init_timers                            
-0000b1bc  __mspabi_fltuf                         
-0000b1e0  clear_LCD                              
-0000b202  getIP                                  
-0000b224  memccpy                                
-0000b246  robot_LEDs                             
-0000b286  init_adc                               
-0000b2a0  init_timeout                           
-0000b2d2  __mspabi_mpyi_f5hw                     
-0000b2ea  TimeOut                                
-0000b300  __mspabi_divu                          
-0000b300  __mspabi_remu                          
-0000b316  memset                                 
-0000b33c  memcpy                                 
-0000b34e  sound_buzzer                           
-0000b360  update_LCD                             
-0000b372  __mspabi_srll                          
-0000b382  set_single_led_color                   
-0000b392  strcpy                                 
-0000b3a2  set_robot_speed                        
-0000b3b0  strlen                                 
-0000b3be  stop_timeout                           
-0000b3ca  reset_timeout                          
-0000b3d2  __mspabi_fltud                         
-0000b3d8  C$$EXIT                                
-0000b3d8  abort                                  
-0000b3de  _system_pre_init                       
-0000b3e2  _system_post_cinit                     
-0000b3e4  ISR_USCI_I2C                           
-0000b472  readjoystick                           
-0000b4cc  EUSCIA0_IRQHandler                     
-0000b4f0  _c_int00_noargs_mpu                    
-0000b510  ADC_ISR                                
-0000b528  timerB0_0_isr                          
-0000b536  timerB1_0_isr                          
-0000b544  timerB2_buzzer_ISR                     
-0000b54e  __TI_ISR_TRAP                          
+00009714  display_LCD                            
+00009938  menu_loop                              
+00009a44  linetrack_motors                       
+00009b44  main                                   
+00009c38  __TI_decompress_lzss                   
+00009d26  __TI_printfi_minimal                   
+00009ecc  __mspabi_mpyf                          
+00009f84  esperar_configuracion                  
+0000a02a  ldr_calibration_display                
+0000a0c6  menu_back                              
+0000a15e  linetrack                              
+0000a1f4  read_LDRs                              
+0000a280  navigation_info_display                
+0000a30a  __mspabi_fltuld                        
+0000a38a  RxPacket                               
+0000a3fe  single_led_display                     
+0000a472  wifi_init                              
+0000a4e0  toggle_all_leds                        
+0000a54c  __TI_auto_init_nobinit_nopinit_hold_wdt
+0000a5b6  init_LCD                               
+0000a61e  __mspabi_fixdli                        
+0000a684  init_GPIOs                             
+0000a6ea  __mspabi_mpyll_f5hw                    
+0000a746  control_joystick                       
+0000a7a2  snprintf                               
+0000a7fc  about_display                          
+0000a854  atoi                                   
+0000a8a6  escape_light                           
+0000a8f4  follow_light                           
+0000a942  delay_ms                               
+0000a98e  pipip_car                              
+0000a9da  pinta_IP                               
+0000aa24  __mspabi_cmpf                          
+0000aa6e  network_display                        
+0000aab2  status_display                         
+0000aaf4  __memcpy_far                           
+0000ab34  comando_ECHO                           
+0000ab72  __TI_zero_init_nomemset                
+0000abb0  __mspabi_slll_15                       
+0000abb4  __mspabi_slll_14                       
+0000abb8  __mspabi_slll_13                       
+0000abbc  __mspabi_slll_12                       
+0000abc0  __mspabi_slll_11                       
+0000abc4  __mspabi_slll_10                       
+0000abc8  __mspabi_slll_9                        
+0000abcc  __mspabi_slll_8                        
+0000abd0  __mspabi_slll_7                        
+0000abd4  __mspabi_slll_6                        
+0000abd8  __mspabi_slll_5                        
+0000abdc  __mspabi_slll_4                        
+0000abe0  __mspabi_slll_3                        
+0000abe4  __mspabi_slll_2                        
+0000abe8  __mspabi_slll_1                        
+0000abee  __mspabi_srll_15                       
+0000abf2  __mspabi_srll_14                       
+0000abf6  __mspabi_srll_13                       
+0000abfa  __mspabi_srll_12                       
+0000abfe  __mspabi_srll_11                       
+0000ac02  __mspabi_srll_10                       
+0000ac06  __mspabi_srll_9                        
+0000ac0a  __mspabi_srll_8                        
+0000ac0e  __mspabi_srll_7                        
+0000ac12  __mspabi_srll_6                        
+0000ac16  __mspabi_srll_5                        
+0000ac1a  __mspabi_srll_4                        
+0000ac1e  __mspabi_srll_3                        
+0000ac22  __mspabi_srll_2                        
+0000ac26  __mspabi_srll_1                        
+0000ac2c  recibir_wifi                           
+0000ac6a  __mpu_init                             
+0000aca6  __TI_decompress_none                   
+0000ace2  __mspabi_sllll                         
+0000ad1c  __mspabi_srlll                         
+0000ad56  mode_display                           
+0000ad90  speed_display                          
+0000adca  I2C_receive                            
+0000ae02  init_uart_wifi                         
+0000ae3a  pedir_mi_IP                            
+0000ae72  sprintf                                
+0000aeaa  init_clocks                            
+0000aee0  strstr                                 
+0000af48  fotodetectors                          
+0000af7a  TxPacket                               
+0000afaa  calibrate_LDR                          
+0000afd8  __mspabi_mpyull_f5hw                   
+0000b004  comando_AT                             
+0000b030  init_i2c                               
+0000b05c  motors                                 
+0000b088  strncpy                                
+0000b0b4  LCD_set_cursor                         
+0000b0dc  __mspabi_fixdi                         
+0000b104  select_network                         
+0000b12c  I2C_send                               
+0000b152  getConState                            
+0000b178  init_menu                              
+0000b19e  init_timers                            
+0000b1c4  __mspabi_fltuf                         
+0000b1e8  clear_LCD                              
+0000b20a  getIP                                  
+0000b22c  memccpy                                
+0000b24e  robot_LEDs                             
+0000b28e  init_adc                               
+0000b2a8  init_timeout                           
+0000b2da  __mspabi_mpyi_f5hw                     
+0000b2f2  TimeOut                                
+0000b308  __mspabi_divu                          
+0000b308  __mspabi_remu                          
+0000b31e  memset                                 
+0000b344  memcpy                                 
+0000b356  sound_buzzer                           
+0000b368  update_LCD                             
+0000b37a  __mspabi_srll                          
+0000b38a  set_single_led_color                   
+0000b39a  strcpy                                 
+0000b3aa  set_robot_speed                        
+0000b3b8  strlen                                 
+0000b3c6  stop_timeout                           
+0000b3d2  reset_timeout                          
+0000b3da  __mspabi_fltud                         
+0000b3e0  C$$EXIT                                
+0000b3e0  abort                                  
+0000b3e6  _system_pre_init                       
+0000b3ea  _system_post_cinit                     
+0000b3ec  ISR_USCI_I2C                           
+0000b47a  readjoystick                           
+0000b4d4  EUSCIA0_IRQHandler                     
+0000b4f8  _c_int00_noargs_mpu                    
+0000b518  ADC_ISR                                
+0000b530  timerB0_0_isr                          
+0000b53e  timerB1_0_isr                          
+0000b54c  timerB2_buzzer_ISR                     
+0000b556  __TI_ISR_TRAP                          
 0000ffce  __TI_int22                             
 0000ffd0  __TI_int23                             
 0000ffd2  __TI_int24                             
